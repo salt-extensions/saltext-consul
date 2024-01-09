@@ -4,7 +4,6 @@ Interact with Consul
 https://www.consul.io
 
 """
-
 import base64
 import http.client
 import logging
@@ -34,9 +33,7 @@ def _get_token():
     """
     Retrieve Consul configuration
     """
-    return __salt__["config.get"]("consul.token") or __salt__["config.get"](
-        "consul:token"
-    )
+    return __salt__["config.get"]("consul.token") or __salt__["config.get"]("consul:token")
 
 
 def _query(
@@ -68,7 +65,7 @@ def _query(
         token = _get_token()
 
     headers = {"X-Consul-Token": token, "Content-Type": "application/json"}
-    base_url = urllib.parse.urljoin(consul_url, "{}/".format(api_version))
+    base_url = urllib.parse.urljoin(consul_url, f"{api_version}/")
     url = urllib.parse.urljoin(base_url, function, False)
 
     if method == "GET":
@@ -149,13 +146,11 @@ def list_(consul_url=None, token=None, key=None, **kwargs):
         query_params["recurse"] = "True"
         function = "kv/"
     else:
-        function = "kv/{}".format(key)
+        function = f"kv/{key}"
 
     query_params["keys"] = "True"
     query_params["separator"] = "/"
-    ret = _query(
-        consul_url=consul_url, function=function, token=token, query_params=query_params
-    )
+    ret = _query(consul_url=consul_url, function=function, token=token, query_params=query_params)
     return ret
 
 
@@ -203,14 +198,12 @@ def get(consul_url=None, key=None, token=None, recurse=False, decode=False, raw=
         raise SaltInvocationError('Required argument "key" is missing.')
 
     query_params = {}
-    function = "kv/{}".format(key)
+    function = f"kv/{key}"
     if recurse:
         query_params["recurse"] = "True"
     if raw:
         query_params["raw"] = True
-    ret = _query(
-        consul_url=consul_url, function=function, token=token, query_params=query_params
-    )
+    ret = _query(consul_url=consul_url, function=function, token=token, query_params=query_params)
 
     if ret["res"]:
         if decode:
@@ -269,9 +262,7 @@ def put(consul_url=None, token=None, key=None, value=None, **kwargs):
         for _l2 in conflicting_args:
             if _l1 in kwargs and _l2 in kwargs and _l1 != _l2:
                 raise SaltInvocationError(
-                    "Using arguments `{}` and `{}` together is invalid.".format(
-                        _l1, _l2
-                    )
+                    f"Using arguments `{_l1}` and `{_l2}` together is invalid."
                 )
 
     query_params = {}
@@ -286,25 +277,27 @@ def put(consul_url=None, token=None, key=None, value=None, **kwargs):
     if "cas" in kwargs:
         if _current["res"]:
             if kwargs["cas"] == 0:
-                ret["message"] = "Key {} exists, index must be non-zero.".format(key)
+                ret["message"] = f"Key {key} exists, index must be non-zero."
                 ret["res"] = False
                 return ret
 
             if kwargs["cas"] != _current["data"]["ModifyIndex"]:
-                ret["message"] = "Key {} exists, but indexes do not match.".format(key)
+                ret["message"] = f"Key {key} exists, but indexes do not match."
                 ret["res"] = False
                 return ret
             query_params["cas"] = kwargs["cas"]
         else:
-            ret[
-                "message"
-            ] = "Key {} does not exists, CAS argument can not be used.".format(key)
+            ret["message"] = f"Key {key} does not exists, CAS argument can not be used."
             ret["res"] = False
             return ret
 
     if "acquire" in kwargs:
         if kwargs["acquire"] not in available_sessions:
-            ret["message"] = "{} is not a valid session.".format(kwargs["acquire"])
+            ret[
+                "message"
+            ] = "{} is not a valid session.".format(  # pylint: disable=consider-using-f-string
+                kwargs["acquire"]
+            )
             ret["res"] = False
             return ret
 
@@ -316,18 +309,22 @@ def put(consul_url=None, token=None, key=None, value=None, **kwargs):
                 if _current["data"]["Session"] == kwargs["release"]:
                     query_params["release"] = kwargs["release"]
                 else:
-                    ret["message"] = "{} locked by another session.".format(key)
+                    ret["message"] = f"{key} locked by another session."
                     ret["res"] = False
                     return ret
 
             else:
-                ret["message"] = "{} is not a valid session.".format(kwargs["acquire"])
+                ret[
+                    "message"
+                ] = "{} is not a valid session.".format(  # pylint: disable=consider-using-f-string
+                    kwargs["acquire"]
+                )
                 ret["res"] = False
         else:
             log.error("Key {0} does not exist. Skipping release.")
 
     data = value
-    function = "kv/{}".format(key)
+    function = f"kv/{key}"
     method = "PUT"
     res = _query(
         consul_url=consul_url,
@@ -340,10 +337,10 @@ def put(consul_url=None, token=None, key=None, value=None, **kwargs):
 
     if res["res"]:
         ret["res"] = True
-        ret["data"] = "Added key {} with value {}.".format(key, value)
+        ret["data"] = f"Added key {key} with value {value}."
     else:
         ret["res"] = False
-        ret["data"] = "Unable to add key {} with value {}.".format(key, value)
+        ret["data"] = f"Unable to add key {key} with value {value}."
         if "error" in res:
             ret["error"] = res["error"]
     return ret
@@ -396,7 +393,7 @@ def delete(consul_url=None, token=None, key=None, **kwargs):
             ret["res"] = False
             return ret
 
-    function = "kv/{}".format(key)
+    function = f"kv/{key}"
     res = _query(
         consul_url=consul_url,
         token=token,
@@ -407,10 +404,10 @@ def delete(consul_url=None, token=None, key=None, **kwargs):
 
     if res["res"]:
         ret["res"] = True
-        ret["message"] = "Deleted key {}.".format(key)
+        ret["message"] = f"Deleted key {key}."
     else:
         ret["res"] = False
-        ret["message"] = "Unable to delete key {}.".format(key)
+        ret["message"] = f"Unable to delete key {key}."
         if "error" in res:
             ret["error"] = res["error"]
     return ret
@@ -596,7 +593,11 @@ def agent_maintenance(consul_url=None, token=None, **kwargs):
     )
     if res["res"]:
         ret["res"] = True
-        ret["message"] = "Agent maintenance mode {}ed.".format(kwargs["enable"])
+        ret[
+            "message"
+        ] = "Agent maintenance mode {}ed.".format(  # pylint: disable=consider-using-f-string
+            kwargs["enable"]
+        )
     else:
         ret["res"] = True
         ret["message"] = "Unable to change maintenance mode for agent."
@@ -635,7 +636,7 @@ def agent_join(consul_url=None, token=None, address=None, **kwargs):
     if "wan" in kwargs:
         query_params["wan"] = kwargs["wan"]
 
-    function = "agent/join/{}".format(address)
+    function = f"agent/join/{address}"
     res = _query(
         consul_url=consul_url,
         function=function,
@@ -680,7 +681,7 @@ def agent_leave(consul_url=None, token=None, node=None):
     if not node:
         raise SaltInvocationError('Required argument "node" is missing.')
 
-    function = "agent/force-leave/{}".format(node)
+    function = f"agent/force-leave/{node}"
     res = _query(
         consul_url=consul_url,
         function=function,
@@ -690,10 +691,10 @@ def agent_leave(consul_url=None, token=None, node=None):
     )
     if res["res"]:
         ret["res"] = True
-        ret["message"] = "Node {} put in leave state.".format(node)
+        ret["message"] = f"Node {node} put in leave state."
     else:
         ret["res"] = False
-        ret["message"] = "Unable to change state for {}.".format(node)
+        ret["message"] = f"Unable to change state for {node}."
     return ret
 
 
@@ -770,13 +771,15 @@ def agent_check_register(consul_url=None, token=None, **kwargs):
         data["TTL"] = kwargs["ttl"]
 
     function = "agent/check/register"
-    res = _query(
-        consul_url=consul_url, function=function, token=token, method="PUT", data=data
-    )
+    res = _query(consul_url=consul_url, function=function, token=token, method="PUT", data=data)
 
     if res["res"]:
         ret["res"] = True
-        ret["message"] = "Check {} added to agent.".format(kwargs["name"])
+        ret[
+            "message"
+        ] = "Check {} added to agent.".format(  # pylint: disable=consider-using-f-string
+            kwargs["name"]
+        )
     else:
         ret["res"] = False
         ret["message"] = "Unable to add check to agent."
@@ -810,11 +813,11 @@ def agent_check_deregister(consul_url=None, token=None, checkid=None):
     if not checkid:
         raise SaltInvocationError('Required argument "checkid" is missing.')
 
-    function = "agent/check/deregister/{}".format(checkid)
+    function = f"agent/check/deregister/{checkid}"
     res = _query(consul_url=consul_url, function=function, token=token, method="GET")
     if res["res"]:
         ret["res"] = True
-        ret["message"] = "Check {} removed from agent.".format(checkid)
+        ret["message"] = f"Check {checkid} removed from agent."
     else:
         ret["res"] = False
         ret["message"] = "Unable to remove check from agent."
@@ -855,7 +858,7 @@ def agent_check_pass(consul_url=None, token=None, checkid=None, **kwargs):
     if "note" in kwargs:
         query_params["note"] = kwargs["note"]
 
-    function = "agent/check/pass/{}".format(checkid)
+    function = f"agent/check/pass/{checkid}"
     res = _query(
         consul_url=consul_url,
         function=function,
@@ -865,10 +868,10 @@ def agent_check_pass(consul_url=None, token=None, checkid=None, **kwargs):
     )
     if res["res"]:
         ret["res"] = True
-        ret["message"] = "Check {} marked as passing.".format(checkid)
+        ret["message"] = f"Check {checkid} marked as passing."
     else:
         ret["res"] = False
-        ret["message"] = "Unable to update check {}.".format(checkid)
+        ret["message"] = f"Unable to update check {checkid}."
     return ret
 
 
@@ -906,7 +909,7 @@ def agent_check_warn(consul_url=None, token=None, checkid=None, **kwargs):
     if "note" in kwargs:
         query_params["note"] = kwargs["note"]
 
-    function = "agent/check/warn/{}".format(checkid)
+    function = f"agent/check/warn/{checkid}"
     res = _query(
         consul_url=consul_url,
         function=function,
@@ -916,10 +919,10 @@ def agent_check_warn(consul_url=None, token=None, checkid=None, **kwargs):
     )
     if res["res"]:
         ret["res"] = True
-        ret["message"] = "Check {} marked as warning.".format(checkid)
+        ret["message"] = f"Check {checkid} marked as warning."
     else:
         ret["res"] = False
-        ret["message"] = "Unable to update check {}.".format(checkid)
+        ret["message"] = f"Unable to update check {checkid}."
     return ret
 
 
@@ -957,7 +960,7 @@ def agent_check_fail(consul_url=None, token=None, checkid=None, **kwargs):
     if "note" in kwargs:
         query_params["note"] = kwargs["note"]
 
-    function = "agent/check/fail/{}".format(checkid)
+    function = f"agent/check/fail/{checkid}"
     res = _query(
         consul_url=consul_url,
         function=function,
@@ -967,10 +970,10 @@ def agent_check_fail(consul_url=None, token=None, checkid=None, **kwargs):
     )
     if res["res"]:
         ret["res"] = True
-        ret["message"] = "Check {} marked as critical.".format(checkid)
+        ret["message"] = f"Check {checkid} marked as critical."
     else:
         ret["res"] = False
-        ret["message"] = "Unable to update check {}.".format(checkid)
+        ret["message"] = f"Unable to update check {checkid}."
     return ret
 
 
@@ -1074,15 +1077,21 @@ def agent_service_register(consul_url=None, token=None, **kwargs):
             data["Check"] = check_dd  # if empty, ignore it
 
     function = "agent/service/register"
-    res = _query(
-        consul_url=consul_url, function=function, token=token, method="PUT", data=data
-    )
+    res = _query(consul_url=consul_url, function=function, token=token, method="PUT", data=data)
     if res["res"]:
         ret["res"] = True
-        ret["message"] = "Service {} registered on agent.".format(kwargs["name"])
+        ret[
+            "message"
+        ] = "Service {} registered on agent.".format(  # pylint: disable=consider-using-f-string
+            kwargs["name"]
+        )
     else:
         ret["res"] = False
-        ret["message"] = "Unable to register service {}.".format(kwargs["name"])
+        ret[
+            "message"
+        ] = "Unable to register service {}.".format(  # pylint: disable=consider-using-f-string
+            kwargs["name"]
+        )
     return ret
 
 
@@ -1114,16 +1123,14 @@ def agent_service_deregister(consul_url=None, token=None, serviceid=None):
     if not serviceid:
         raise SaltInvocationError('Required argument "serviceid" is missing.')
 
-    function = "agent/service/deregister/{}".format(serviceid)
-    res = _query(
-        consul_url=consul_url, function=function, token=token, method="PUT", data=data
-    )
+    function = f"agent/service/deregister/{serviceid}"
+    res = _query(consul_url=consul_url, function=function, token=token, method="PUT", data=data)
     if res["res"]:
         ret["res"] = True
-        ret["message"] = "Service {} removed from agent.".format(serviceid)
+        ret["message"] = f"Service {serviceid} removed from agent."
     else:
         ret["res"] = False
-        ret["message"] = "Unable to remove service {}.".format(serviceid)
+        ret["message"] = f"Unable to remove service {serviceid}."
     return ret
 
 
@@ -1168,19 +1175,15 @@ def agent_service_maintenance(consul_url=None, token=None, serviceid=None, **kwa
     if "reason" in kwargs:
         query_params["reason"] = kwargs["reason"]
 
-    function = "agent/service/maintenance/{}".format(serviceid)
-    res = _query(
-        consul_url=consul_url, token=token, function=function, query_params=query_params
-    )
+    function = f"agent/service/maintenance/{serviceid}"
+    res = _query(consul_url=consul_url, token=token, function=function, query_params=query_params)
 
     if res["res"]:
         ret["res"] = True
-        ret["message"] = "Service {} set in maintenance mode.".format(serviceid)
+        ret["message"] = f"Service {serviceid} set in maintenance mode."
     else:
         ret["res"] = False
-        ret["message"] = "Unable to set service {} to maintenance mode.".format(
-            serviceid
-        )
+        ret["message"] = f"Unable to set service {serviceid} to maintenance mode."
     return ret
 
 
@@ -1255,19 +1258,23 @@ def session_create(consul_url=None, token=None, **kwargs):
             ret["message"] = ("TTL must be ", "between 0 and 3600.")
             ret["res"] = False
             return ret
-        data["TTL"] = "{}s".format(_ttl)
+        data["TTL"] = f"{_ttl}s"
 
     function = "session/create"
-    res = _query(
-        consul_url=consul_url, function=function, token=token, method="PUT", data=data
-    )
+    res = _query(consul_url=consul_url, function=function, token=token, method="PUT", data=data)
 
     if res["res"]:
         ret["res"] = True
-        ret["message"] = "Created session {}.".format(kwargs["name"])
+        ret["message"] = "Created session {}.".format(  # pylint: disable=consider-using-f-string
+            kwargs["name"]
+        )
     else:
         ret["res"] = False
-        ret["message"] = "Unable to create session {}.".format(kwargs["name"])
+        ret[
+            "message"
+        ] = "Unable to create session {}.".format(  # pylint: disable=consider-using-f-string
+            kwargs["name"]
+        )
     return ret
 
 
@@ -1305,9 +1312,7 @@ def session_list(consul_url=None, token=None, return_list=False, **kwargs):
         query_params["dc"] = kwargs["dc"]
 
     function = "session/list"
-    ret = _query(
-        consul_url=consul_url, function=function, token=token, query_params=query_params
-    )
+    ret = _query(consul_url=consul_url, function=function, token=token, query_params=query_params)
 
     if return_list:
         _list = []
@@ -1351,7 +1356,7 @@ def session_destroy(consul_url=None, token=None, session=None, **kwargs):
     if "dc" in kwargs:
         query_params["dc"] = kwargs["dc"]
 
-    function = "session/destroy/{}".format(session)
+    function = f"session/destroy/{session}"
     res = _query(
         consul_url=consul_url,
         function=function,
@@ -1361,10 +1366,10 @@ def session_destroy(consul_url=None, token=None, session=None, **kwargs):
     )
     if res["res"]:
         ret["res"] = True
-        ret["message"] = "Destroyed Session {}.".format(session)
+        ret["message"] = f"Destroyed Session {session}."
     else:
         ret["res"] = False
-        ret["message"] = "Unable to destroy session {}.".format(session)
+        ret["message"] = f"Unable to destroy session {session}."
     return ret
 
 
@@ -1402,10 +1407,8 @@ def session_info(consul_url=None, token=None, session=None, **kwargs):
     if "dc" in kwargs:
         query_params["dc"] = kwargs["dc"]
 
-    function = "session/info/{}".format(session)
-    ret = _query(
-        consul_url=consul_url, function=function, token=token, query_params=query_params
-    )
+    function = f"session/info/{session}"
+    ret = _query(consul_url=consul_url, function=function, token=token, query_params=query_params)
     return ret
 
 
@@ -1543,9 +1546,7 @@ def catalog_register(consul_url=None, token=None, **kwargs):
                 "warning",
                 "critical",
             ):
-                ret[
-                    "message"
-                ] = "Check status must be unknown, passing, warning, or critical."
+                ret["message"] = "Check status must be unknown, passing, warning, or critical."
                 ret["res"] = False
                 return ret
             data["Check"]["Status"] = kwargs["check_status"]
@@ -1560,17 +1561,21 @@ def catalog_register(consul_url=None, token=None, **kwargs):
             data["Check"]["Notes"] = kwargs["check_notes"]
 
     function = "catalog/register"
-    res = _query(
-        consul_url=consul_url, function=function, token=token, method="PUT", data=data
-    )
+    res = _query(consul_url=consul_url, function=function, token=token, method="PUT", data=data)
     if res["res"]:
         ret["res"] = True
-        ret["message"] = "Catalog registration for {} successful.".format(
+        ret[
+            "message"
+        ] = "Catalog registration for {} successful.".format(  # pylint: disable=consider-using-f-string
             kwargs["node"]
         )
     else:
         ret["res"] = False
-        ret["message"] = "Catalog registration for {} failed.".format(kwargs["node"])
+        ret[
+            "message"
+        ] = "Catalog registration for {} failed.".format(  # pylint: disable=consider-using-f-string
+            kwargs["node"]
+        )
     ret["data"] = data
     return ret
 
@@ -1621,16 +1626,22 @@ def catalog_deregister(consul_url=None, token=None, **kwargs):
         data["ServiceID"] = kwargs["serviceid"]
 
     function = "catalog/deregister"
-    res = _query(
-        consul_url=consul_url, function=function, token=token, method="PUT", data=data
-    )
+    res = _query(consul_url=consul_url, function=function, token=token, method="PUT", data=data)
 
     if res["res"]:
         ret["res"] = True
-        ret["message"] = "Catalog item {} removed.".format(kwargs["node"])
+        ret[
+            "message"
+        ] = "Catalog item {} removed.".format(  # pylint: disable=consider-using-f-string
+            kwargs["node"]
+        )
     else:
         ret["res"] = False
-        ret["message"] = "Removing Catalog item {} failed.".format(kwargs["node"])
+        ret[
+            "message"
+        ] = "Removing Catalog item {} failed.".format(  # pylint: disable=consider-using-f-string
+            kwargs["node"]
+        )
     return ret
 
 
@@ -1692,9 +1703,7 @@ def catalog_nodes(consul_url=None, token=None, **kwargs):
         query_params["dc"] = kwargs["dc"]
 
     function = "catalog/nodes"
-    ret = _query(
-        consul_url=consul_url, function=function, token=token, query_params=query_params
-    )
+    ret = _query(consul_url=consul_url, function=function, token=token, query_params=query_params)
     return ret
 
 
@@ -1728,9 +1737,7 @@ def catalog_services(consul_url=None, token=None, **kwargs):
         query_params["dc"] = kwargs["dc"]
 
     function = "catalog/services"
-    ret = _query(
-        consul_url=consul_url, function=function, token=token, query_params=query_params
-    )
+    ret = _query(consul_url=consul_url, function=function, token=token, query_params=query_params)
     return ret
 
 
@@ -1770,10 +1777,8 @@ def catalog_service(consul_url=None, token=None, service=None, **kwargs):
     if "tag" in kwargs:
         query_params["tag"] = kwargs["tag"]
 
-    function = "catalog/service/{}".format(service)
-    ret = _query(
-        consul_url=consul_url, function=function, token=token, query_params=query_params
-    )
+    function = f"catalog/service/{service}"
+    ret = _query(consul_url=consul_url, function=function, token=token, query_params=query_params)
     return ret
 
 
@@ -1810,10 +1815,8 @@ def catalog_node(consul_url=None, token=None, node=None, **kwargs):
     if "dc" in kwargs:
         query_params["dc"] = kwargs["dc"]
 
-    function = "catalog/node/{}".format(node)
-    ret = _query(
-        consul_url=consul_url, function=function, token=token, query_params=query_params
-    )
+    function = f"catalog/node/{node}"
+    ret = _query(consul_url=consul_url, function=function, token=token, query_params=query_params)
     return ret
 
 
@@ -1850,10 +1853,8 @@ def health_node(consul_url=None, token=None, node=None, **kwargs):
     if "dc" in kwargs:
         query_params["dc"] = kwargs["dc"]
 
-    function = "health/node/{}".format(node)
-    ret = _query(
-        consul_url=consul_url, function=function, token=token, query_params=query_params
-    )
+    function = f"health/node/{node}"
+    ret = _query(consul_url=consul_url, function=function, token=token, query_params=query_params)
     return ret
 
 
@@ -1890,10 +1891,8 @@ def health_checks(consul_url=None, token=None, service=None, **kwargs):
     if "dc" in kwargs:
         query_params["dc"] = kwargs["dc"]
 
-    function = "health/checks/{}".format(service)
-    ret = _query(
-        consul_url=consul_url, function=function, token=token, query_params=query_params
-    )
+    function = f"health/checks/{service}"
+    ret = _query(consul_url=consul_url, function=function, token=token, query_params=query_params)
     return ret
 
 
@@ -1941,10 +1940,8 @@ def health_service(consul_url=None, token=None, service=None, **kwargs):
     if "passing" in kwargs:
         query_params["passing"] = kwargs["passing"]
 
-    function = "health/service/{}".format(service)
-    ret = _query(
-        consul_url=consul_url, function=function, token=token, query_params=query_params
-    )
+    function = f"health/service/{service}"
+    ret = _query(consul_url=consul_url, function=function, token=token, query_params=query_params)
     return ret
 
 
@@ -1991,10 +1988,8 @@ def health_state(consul_url=None, token=None, state=None, **kwargs):
         ret["res"] = False
         return ret
 
-    function = "health/state/{}".format(state)
-    ret = _query(
-        consul_url=consul_url, function=function, token=token, query_params=query_params
-    )
+    function = f"health/state/{state}"
+    ret = _query(consul_url=consul_url, function=function, token=token, query_params=query_params)
     return ret
 
 
@@ -2100,16 +2095,20 @@ def acl_create(consul_url=None, token=None, **kwargs):
         data["Rules"] = kwargs["rules"]
 
     function = "acl/create"
-    res = _query(
-        consul_url=consul_url, token=token, data=data, method="PUT", function=function
-    )
+    res = _query(consul_url=consul_url, token=token, data=data, method="PUT", function=function)
 
     if res["res"]:
         ret["res"] = True
-        ret["message"] = "ACL {} created.".format(kwargs["name"])
+        ret["message"] = "ACL {} created.".format(  # pylint: disable=consider-using-f-string
+            kwargs["name"]
+        )
     else:
         ret["res"] = False
-        ret["message"] = "Removing Catalog item {} failed.".format(kwargs["name"])
+        ret[
+            "message"
+        ] = "Removing Catalog item {} failed.".format(  # pylint: disable=consider-using-f-string
+            kwargs["name"]
+        )
     return ret
 
 
@@ -2163,16 +2162,20 @@ def acl_update(consul_url=None, token=None, **kwargs):
         data["Rules"] = kwargs["rules"]
 
     function = "acl/update"
-    res = _query(
-        consul_url=consul_url, token=token, data=data, method="PUT", function=function
-    )
+    res = _query(consul_url=consul_url, token=token, data=data, method="PUT", function=function)
 
     if res["res"]:
         ret["res"] = True
-        ret["message"] = "ACL {} created.".format(kwargs["name"])
+        ret["message"] = "ACL {} created.".format(  # pylint: disable=consider-using-f-string
+            kwargs["name"]
+        )
     else:
         ret["res"] = False
-        ret["message"] = "Updating ACL {} failed.".format(kwargs["name"])
+        ret[
+            "message"
+        ] = "Updating ACL {} failed.".format(  # pylint: disable=consider-using-f-string
+            kwargs["name"]
+        )
 
     return ret
 
@@ -2207,17 +2210,21 @@ def acl_delete(consul_url=None, token=None, **kwargs):
         ret["res"] = False
         return ret
 
-    function = "acl/destroy/{}".format(kwargs["id"])
-    res = _query(
-        consul_url=consul_url, token=token, data=data, method="PUT", function=function
-    )
+    function = "acl/destroy/{}".format(kwargs["id"])  # pylint: disable=consider-using-f-string
+    res = _query(consul_url=consul_url, token=token, data=data, method="PUT", function=function)
 
     if res["res"]:
         ret["res"] = True
-        ret["message"] = "ACL {} deleted.".format(kwargs["id"])
+        ret["message"] = "ACL {} deleted.".format(  # pylint: disable=consider-using-f-string
+            kwargs["id"]
+        )
     else:
         ret["res"] = False
-        ret["message"] = "Removing ACL {} failed.".format(kwargs["id"])
+        ret[
+            "message"
+        ] = "Removing ACL {} failed.".format(  # pylint: disable=consider-using-f-string
+            kwargs["id"]
+        )
 
     return ret
 
@@ -2252,7 +2259,7 @@ def acl_info(consul_url=None, **kwargs):
         ret["res"] = False
         return ret
 
-    function = "acl/info/{}".format(kwargs["id"])
+    function = "acl/info/{}".format(kwargs["id"])  # pylint: disable=consider-using-f-string
     ret = _query(consul_url=consul_url, data=data, method="GET", function=function)
     return ret
 
@@ -2288,17 +2295,21 @@ def acl_clone(consul_url=None, token=None, **kwargs):
         ret["res"] = False
         return ret
 
-    function = "acl/clone/{}".format(kwargs["id"])
-    res = _query(
-        consul_url=consul_url, token=token, data=data, method="PUT", function=function
-    )
+    function = "acl/clone/{}".format(kwargs["id"])  # pylint: disable=consider-using-f-string
+    res = _query(consul_url=consul_url, token=token, data=data, method="PUT", function=function)
     if res["res"]:
         ret["res"] = True
-        ret["message"] = "ACL {} cloned.".format(kwargs["name"])
+        ret["message"] = "ACL {} cloned.".format(  # pylint: disable=consider-using-f-string
+            kwargs["name"]
+        )
         ret["ID"] = res["data"]
     else:
         ret["res"] = False
-        ret["message"] = "Cloning ACL item {} failed.".format(kwargs["name"])
+        ret[
+            "message"
+        ] = "Cloning ACL item {} failed.".format(  # pylint: disable=consider-using-f-string
+            kwargs["name"]
+        )
     return ret
 
 
@@ -2327,9 +2338,7 @@ def acl_list(consul_url=None, token=None, **kwargs):
             return ret
 
     function = "acl/list"
-    ret = _query(
-        consul_url=consul_url, token=token, data=data, method="GET", function=function
-    )
+    ret = _query(consul_url=consul_url, token=token, data=data, method="GET", function=function)
     return ret
 
 
@@ -2378,7 +2387,7 @@ def event_fire(consul_url=None, token=None, name=None, **kwargs):
     if "tag" in kwargs:
         query_params = kwargs["tag"]
 
-    function = "event/fire/{}".format(name)
+    function = f"event/fire/{name}"
     res = _query(
         consul_url=consul_url,
         token=token,
@@ -2389,11 +2398,15 @@ def event_fire(consul_url=None, token=None, name=None, **kwargs):
 
     if res["res"]:
         ret["res"] = True
-        ret["message"] = "Event {} fired.".format(name)
+        ret["message"] = f"Event {name} fired."
         ret["data"] = res["data"]
     else:
         ret["res"] = False
-        ret["message"] = "Cloning ACL item {} failed.".format(kwargs["name"])
+        ret[
+            "message"
+        ] = "Cloning ACL item {} failed.".format(  # pylint: disable=consider-using-f-string
+            kwargs["name"]
+        )
     return ret
 
 
@@ -2428,7 +2441,5 @@ def event_list(consul_url=None, token=None, **kwargs):
         raise SaltInvocationError('Required argument "name" is missing.')
 
     function = "event/list/"
-    ret = _query(
-        consul_url=consul_url, token=token, query_params=query_params, function=function
-    )
+    ret = _query(consul_url=consul_url, token=token, query_params=query_params, function=function)
     return ret

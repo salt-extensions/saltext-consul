@@ -134,7 +134,6 @@ This behavior can be disabled by setting ``expand_keys`` to ``false``.
       - consul: my_consul_config expand_keys=false
 
 """
-
 import logging
 import re
 
@@ -208,9 +207,7 @@ def ext_pillar(minion_id, pillar, conf):  # pylint: disable=W0613
     else:
         opts["profile"] = None
 
-    expand_keys_re = re.compile(
-        "expand_keys=False", re.IGNORECASE
-    )  # pylint: disable=W1401
+    expand_keys_re = re.compile("expand_keys=False", re.IGNORECASE)  # pylint: disable=W1401
     match = expand_keys_re.search(temp)
     if match:
         opts["expand_keys"] = False

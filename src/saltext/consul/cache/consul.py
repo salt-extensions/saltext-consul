@@ -55,7 +55,6 @@ value to ``consul``:
 .. _`python-consul documentation`: https://python-consul.readthedocs.io/en/latest/#consul
 
 """
-
 import logging
 import time
 
@@ -127,7 +126,7 @@ def store(bank, key, data):
         api.kv.put(c_key, c_data)
         api.kv.put(tstamp_key, salt.payload.dumps(int(time.time())))
     except Exception as exc:  # pylint: disable=broad-except
-        raise SaltCacheError(f"There was an error writing the key, {c_key}: {exc}")
+        raise SaltCacheError(f"There was an error writing the key, {c_key}: {exc}") from exc
 
 
 def fetch(bank, key):
@@ -141,7 +140,7 @@ def fetch(bank, key):
             return {}
         return salt.payload.loads(value["Value"])
     except Exception as exc:  # pylint: disable=broad-except
-        raise SaltCacheError(f"There was an error reading the key, {c_key}: {exc}")
+        raise SaltCacheError(f"There was an error reading the key, {c_key}: {exc}") from exc
 
 
 def flush(bank, key=None):
@@ -159,7 +158,7 @@ def flush(bank, key=None):
             api.kv.delete(tstamp_key)
         return api.kv.delete(c_key, recurse=key is None)
     except Exception as exc:  # pylint: disable=broad-except
-        raise SaltCacheError(f"There was an error removing the key, {c_key}: {exc}")
+        raise SaltCacheError(f"There was an error removing the key, {c_key}: {exc}") from exc
 
 
 def list_(bank):
@@ -169,7 +168,7 @@ def list_(bank):
     try:
         _, keys = api.kv.get(bank + "/", keys=True, separator="/")
     except Exception as exc:  # pylint: disable=broad-except
-        raise SaltCacheError(f'There was an error getting the key "{bank}": {exc}')
+        raise SaltCacheError(f'There was an error getting the key "{bank}": {exc}') from exc
     if keys is None:
         keys = []
     else:
@@ -187,10 +186,10 @@ def contains(bank, key):
     Checks if the specified bank contains the specified key.
     """
     try:
-        c_key = "{}/{}".format(bank, key or "")
+        c_key = "{}/{}".format(bank, key or "")  # pylint: disable=consider-using-f-string
         _, value = api.kv.get(c_key, keys=True)
     except Exception as exc:  # pylint: disable=broad-except
-        raise SaltCacheError(f"There was an error getting the key, {c_key}: {exc}")
+        raise SaltCacheError(f"There was an error getting the key, {c_key}: {exc}") from exc
     return value is not None
 
 
@@ -206,4 +205,4 @@ def updated(bank, key):
             return None
         return salt.payload.loads(value["Value"])
     except Exception as exc:  # pylint: disable=broad-except
-        raise SaltCacheError(f"There was an error reading the key, {c_key}: {exc}")
+        raise SaltCacheError(f"There was an error reading the key, {c_key}: {exc}") from exc
