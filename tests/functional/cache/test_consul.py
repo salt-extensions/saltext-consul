@@ -3,11 +3,11 @@ import socket
 import time
 
 import pytest
-from saltfactories.utils import random_string
-
 import salt.cache
 import salt.loader
-from tests.pytests.functional.cache.helpers import run_common_cache_tests
+from saltfactories.utils import random_string
+
+from tests.functional.cache.helpers import run_common_cache_tests
 
 docker = pytest.importorskip("docker")
 

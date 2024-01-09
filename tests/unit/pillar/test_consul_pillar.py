@@ -1,12 +1,11 @@
-import pytest
+from unittest.mock import MagicMock
+from unittest.mock import patch
 
+import pytest
 import salt.pillar.consul_pillar as consul_pillar
-from tests.support.mock import MagicMock, patch
 
 pytestmark = [
-    pytest.mark.skipif(
-        not consul_pillar.consul, reason="python-consul module not installed"
-    )
+    pytest.mark.skipif(not consul_pillar.consul, reason="python-consul module not installed")
 ]
 
 
@@ -45,9 +44,7 @@ def base_pillar_data():
 def configure_loader_modules():
     return {
         consul_pillar: {
-            "__opts__": {
-                "consul_config": {"consul.port": 8500, "consul.host": "172.17.0.15"}
-            },
+            "__opts__": {"consul_config": {"consul.port": 8500, "consul.host": "172.17.0.15"}},
             "get_conn": MagicMock(return_value="consul_connection"),
         }
     }
@@ -55,24 +52,22 @@ def configure_loader_modules():
 
 def test_connection(base_pillar_data):
     with patch.dict(
-        consul_pillar.__salt__, {"grains.get": MagicMock(return_value=({}))}
+        consul_pillar.__salt__,
+        {"grains.get": MagicMock(return_value=({}))},  # pylint: disable=superfluous-parens
     ):
         with patch.object(
             consul_pillar,
             "consul_fetch",
             MagicMock(return_value=("2232", base_pillar_data)),
         ):
-            consul_pillar.ext_pillar(
-                "testminion", {}, "consul_config root=test-shared/"
-            )
-            consul_pillar.get_conn.assert_called_once_with(
-                consul_pillar.__opts__, "consul_config"
-            )
+            consul_pillar.ext_pillar("testminion", {}, "consul_config root=test-shared/")
+            consul_pillar.get_conn.assert_called_once_with(consul_pillar.__opts__, "consul_config")
 
 
 def test_pillar_data(base_pillar_data):
     with patch.dict(
-        consul_pillar.__salt__, {"grains.get": MagicMock(return_value=({}))}
+        consul_pillar.__salt__,
+        {"grains.get": MagicMock(return_value=({}))},  # pylint: disable=superfluous-parens
     ):
         with patch.object(
             consul_pillar,
@@ -82,16 +77,15 @@ def test_pillar_data(base_pillar_data):
             pillar_data = consul_pillar.ext_pillar(
                 "testminion", {}, "consul_config root=test-shared/"
             )
-            consul_pillar.consul_fetch.assert_called_once_with(
-                "consul_connection", "test-shared"
-            )
+            consul_pillar.consul_fetch.assert_called_once_with("consul_connection", "test-shared")
             assert sorted(pillar_data) == ["sites", "user"]
             assert "blankvalue" not in pillar_data["user"]
 
 
 def test_blank_root(base_pillar_data):
     with patch.dict(
-        consul_pillar.__salt__, {"grains.get": MagicMock(return_value=({}))}
+        consul_pillar.__salt__,
+        {"grains.get": MagicMock(return_value=({}))},  # pylint: disable=superfluous-parens
     ):
         with patch.object(
             consul_pillar,
@@ -105,7 +99,8 @@ def test_blank_root(base_pillar_data):
 
 def test_pillar_nest(base_pillar_data):
     with patch.dict(
-        consul_pillar.__salt__, {"grains.get": MagicMock(return_value=({}))}
+        consul_pillar.__salt__,
+        {"grains.get": MagicMock(return_value=({}))},  # pylint: disable=superfluous-parens
     ):
         with patch.object(
             consul_pillar,
@@ -123,7 +118,8 @@ def test_pillar_nest(base_pillar_data):
 
 def test_value_parsing(base_pillar_data):
     with patch.dict(
-        consul_pillar.__salt__, {"grains.get": MagicMock(return_value=({}))}
+        consul_pillar.__salt__,
+        {"grains.get": MagicMock(return_value=({}))},  # pylint: disable=superfluous-parens
     ):
         with patch.object(
             consul_pillar,
@@ -138,7 +134,8 @@ def test_value_parsing(base_pillar_data):
 
 def test_non_expansion(base_pillar_data):
     with patch.dict(
-        consul_pillar.__salt__, {"grains.get": MagicMock(return_value=({}))}
+        consul_pillar.__salt__,
+        {"grains.get": MagicMock(return_value=({}))},  # pylint: disable=superfluous-parens
     ):
         with patch.object(
             consul_pillar,
