@@ -92,11 +92,11 @@ def acl_present(
     rules
         Specifies rules for this ACL token.
 
-    consul_url : http://locahost:8500
+    consul_url : http://localhost:8500
         consul URL to query
 
     .. note::
-        For more information https://www.consul.io/api/acl.html#create-acl-token, https://www.consul.io/api/acl.html#update-acl-token
+        For more information https://www.consul.io/api/acl.html#bootstrap-acls
     """
 
     ret = {
@@ -169,11 +169,11 @@ def acl_absent(name, id=None, token=None, consul_url="http://localhost:8500"):
     token
         token to authenticate you Consul query
 
-    consul_url : http://locahost:8500
+    consul_url : http://localhost:8500
         consul URL to query
 
     .. note::
-        For more information https://www.consul.io/api/acl.html#delete-acl-token
+        For more information https://www.consul.io/api/acl.html#bootstrap-acls
 
     """
     ret = {
