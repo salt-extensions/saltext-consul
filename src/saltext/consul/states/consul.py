@@ -92,18 +92,18 @@ def acl_present(
     rules
         Specifies rules for this ACL token.
 
-    consul_url : http://locahost:8500
+    consul_url : http://localhost:8500
         consul URL to query
 
     .. note::
-        For more information https://www.consul.io/api/acl.html#create-acl-token, https://www.consul.io/api/acl.html#update-acl-token
+        For more information https://www.consul.io/api/acl.html#bootstrap-acls
     """
 
     ret = {
         "name": name,
         "changes": {},
         "result": True,
-        "comment": 'ACL "{}" exists and is up to date'.format(name),
+        "comment": f'ACL "{name}" exists and is up to date',
     }
 
     exists = _acl_exists(name, id, token, consul_url)
@@ -169,18 +169,18 @@ def acl_absent(name, id=None, token=None, consul_url="http://localhost:8500"):
     token
         token to authenticate you Consul query
 
-    consul_url : http://locahost:8500
+    consul_url : http://localhost:8500
         consul URL to query
 
     .. note::
-        For more information https://www.consul.io/api/acl.html#delete-acl-token
+        For more information https://www.consul.io/api/acl.html#bootstrap-acls
 
     """
     ret = {
         "name": id,
         "changes": {},
         "result": True,
-        "comment": 'ACL "{}" does not exist'.format(id),
+        "comment": f'ACL "{id}" does not exist',
     }
 
     exists = _acl_exists(name, id, token, consul_url)
@@ -190,9 +190,7 @@ def acl_absent(name, id=None, token=None, consul_url="http://localhost:8500"):
             ret["comment"] = "The acl exists, it will be deleted"
             return ret
 
-        delete = __salt__["consul.acl_delete"](
-            id=exists["id"], token=token, consul_url=consul_url
-        )
+        delete = __salt__["consul.acl_delete"](id=exists["id"], token=token, consul_url=consul_url)
         if delete["res"]:
             ret["result"] = True
             ret["comment"] = "The acl has been deleted"
