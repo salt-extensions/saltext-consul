@@ -7,7 +7,10 @@ author_email: eitr@devops.tech
 docs_url: ''
 license: apache
 loaders:
+  - cache
   - module
+  - pillar
+  - sdb
   - state
 max_salt_version: 3006
 no_saltext_namespace: false

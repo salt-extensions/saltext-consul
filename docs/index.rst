@@ -15,7 +15,10 @@ Salt Extension for interacting with Consul
   :caption: Provided Modules
   :hidden:
 
+  ref/cache/index
   ref/modules/index
+  ref/pillar/index
+  ref/sdb/index
   ref/states/index
 
 .. toctree::
