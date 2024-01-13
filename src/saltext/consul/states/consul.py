@@ -10,11 +10,19 @@ The consul module is used to create and manage Consul ACLs
 
     acl_present:
       consul.acl_present:
-        - id: 38AC8470-4A83-4140-8DFD-F924CD32917F
         - name: acl_name
-        - rules: node "" {policy = "write"} service "" {policy = "read"} key "_rexec" {policy = "write"}
-        - type: client
         - consul_url: http://localhost:8500
+        - rules:
+          - node: "host.example.local"
+            policy: "write"
+          - agent: "host.example.local"
+            policy: "write"
+          - session: "host.example.local"
+            policy: "write"
+          - key: ""
+            policy: "read"
+          - service: ""
+            policy: "read"
 
     acl_delete:
        consul.acl_absent:

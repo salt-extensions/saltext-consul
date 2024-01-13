@@ -10,4 +10,3 @@ _________________
     :toctree:
 
     consul
-    consul_mod
