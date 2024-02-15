@@ -55,8 +55,8 @@ def _query(
     :param function:    The Consul api function to perform.
     :param method:      The HTTP method, e.g. GET or POST.
     :param data:        The data to be sent for POST method. This param is ignored for GET requests.
-    :param decode:      Decode
-    :param text:        Text
+    :param decode:      Passed to salt.utils.http.query to decode the output into a data structure.
+    :param text:        Passed to salt.utils.http.query to return the raw response body in the "text" key.
     :return:            The json response from the API call or False.
     """
 
@@ -86,7 +86,8 @@ def _query(
         method=method,
         params=query_params,
         data=data,
-        decode=True,
+        decode=decode,
+        text=text,
         status=True,
         header_dict=headers,
         opts=__opts__,
@@ -1004,8 +1005,8 @@ def agent_service_register(consul_url=None, token=None, decode=False, text=True,
                       endpoint must be used periodically to update
                       the state of the check.
     :param check_interval: Interval at which the check should run.
-    :param decode: Decode
-    :param text: Text
+    :param decode: Passed to salt.utils.http.query to decode the output into a data structure.
+    :param text: Passed to salt.utils.http.query to return the raw response body in the "text" key.
     :return: Boolean and message indicating success or failure.
 
     CLI Example:
@@ -1115,8 +1116,8 @@ def agent_service_deregister(consul_url=None, token=None, serviceid=None, decode
 
     :param consul_url: The Consul server URL.
     :param serviceid: A serviceid describing the service.
-    :param decode: Decode
-    :param text: Text
+    :param decode: Passed to salt.utils.http.query to decode the output into a data structure.
+    :param text: Passed to salt.utils.http.query to return the raw response body in the "text" key.
     :return: Boolean and message indicating success or failure.
 
     CLI Example:
