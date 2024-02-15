@@ -44,6 +44,8 @@ def _query(
     api_version="v1",
     data=None,
     query_params=None,
+    decode=True,
+    text=False,
 ):
     """
     Consul object method function to construct and execute on the API URL.
@@ -53,6 +55,8 @@ def _query(
     :param function:    The Consul api function to perform.
     :param method:      The HTTP method, e.g. GET or POST.
     :param data:        The data to be sent for POST method. This param is ignored for GET requests.
+    :param decode:      Passed to salt.utils.http.query to decode the output into a data structure.
+    :param text:        Passed to salt.utils.http.query to return the raw response body in the "text" key.
     :return:            The json response from the API call or False.
     """
 
@@ -82,7 +86,8 @@ def _query(
         method=method,
         params=query_params,
         data=data,
-        decode=True,
+        decode=decode,
+        text=text,
         status=True,
         header_dict=headers,
         opts=__opts__,
@@ -977,7 +982,7 @@ def agent_check_fail(consul_url=None, token=None, checkid=None, **kwargs):
     return ret
 
 
-def agent_service_register(consul_url=None, token=None, **kwargs):
+def agent_service_register(consul_url=None, token=None, decode=False, text=True, **kwargs):
     """
     The used to add a new service, with an optional
     health check, to the local agent.
@@ -1000,6 +1005,8 @@ def agent_service_register(consul_url=None, token=None, **kwargs):
                       endpoint must be used periodically to update
                       the state of the check.
     :param check_interval: Interval at which the check should run.
+    :param decode: Passed to salt.utils.http.query to decode the output into a data structure.
+    :param text: Passed to salt.utils.http.query to return the raw response body in the "text" key.
     :return: Boolean and message indicating success or failure.
 
     CLI Example:
@@ -1077,7 +1084,15 @@ def agent_service_register(consul_url=None, token=None, **kwargs):
             data["Check"] = check_dd  # if empty, ignore it
 
     function = "agent/service/register"
-    res = _query(consul_url=consul_url, function=function, token=token, method="PUT", data=data)
+    res = _query(
+        consul_url=consul_url,
+        function=function,
+        token=token,
+        method="PUT",
+        data=data,
+        decode=decode,
+        text=text,
+    )
     if res["res"]:
         ret["res"] = True
         ret[
@@ -1095,12 +1110,14 @@ def agent_service_register(consul_url=None, token=None, **kwargs):
     return ret
 
 
-def agent_service_deregister(consul_url=None, token=None, serviceid=None):
+def agent_service_deregister(consul_url=None, token=None, serviceid=None, decode=False, text=True):
     """
     Used to remove a service.
 
     :param consul_url: The Consul server URL.
     :param serviceid: A serviceid describing the service.
+    :param decode: Passed to salt.utils.http.query to decode the output into a data structure.
+    :param text: Passed to salt.utils.http.query to return the raw response body in the "text" key.
     :return: Boolean and message indicating success or failure.
 
     CLI Example:
@@ -2080,9 +2097,6 @@ def acl_create(consul_url=None, token=None, **kwargs):
             ret["res"] = False
             return ret
 
-    if "id" in kwargs:
-        data["id"] = kwargs["id"]
-
     if "name" in kwargs:
         data["Name"] = kwargs["name"]
     else:
@@ -2092,7 +2106,15 @@ def acl_create(consul_url=None, token=None, **kwargs):
         data["Type"] = kwargs["type"]
 
     if "rules" in kwargs:
-        data["Rules"] = kwargs["rules"]
+        rules_str = ""
+        rules = kwargs["rules"]
+        for item in rules:
+            for key, val in item.items():
+                if key != "policy":
+                    rules_str += f'{key} "{val}" {{\n'
+                else:
+                    rules_str += f'  {key} = "{val}"\n}}\n'
+        data["Rules"] = rules_str
 
     function = "acl/create"
     res = _query(consul_url=consul_url, token=token, data=data, method="PUT", function=function)
@@ -2225,6 +2247,7 @@ def acl_delete(consul_url=None, token=None, **kwargs):
         ] = "Removing ACL {} failed.".format(  # pylint: disable=consider-using-f-string
             kwargs["id"]
         )
+        ret["changes"] = res
 
     return ret
 

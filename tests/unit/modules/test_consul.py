@@ -1471,9 +1471,49 @@ def test_acl_create():
                 consul_url=consul_url,
             )
 
-    with patch.object(salt.utils.http, "query", return_value=mock_http_result):
+    mock_http_query = MagicMock(return_value=mock_http_result)
+    with patch.object(salt.utils.http, "query", mock_http_query):
         with patch.dict(consul.__salt__, {"config.get": mock_url}):
             result = consul.acl_create(consul_url=consul_url, token=token, name=name)
+            expected = {"message": f"ACL {name} created.", "res": True}
+            assert expected == result
+
+            mock_http_query.reset_mock()
+
+            # acl_create with rules
+            rules = [
+                {
+                    "node": "host.example.local",
+                    "policy": "write",
+                },
+                {
+                    "agent": "host.example.local",
+                    "policy": "write",
+                },
+                {
+                    "session": "host.example.local",
+                    "policy": "write",
+                },
+                {
+                    "key": "",
+                    "policy": "read",
+                },
+                {
+                    "service": "",
+                    "policy": "read",
+                },
+            ]
+            result = consul.acl_create(consul_url=consul_url, token=token, name=name, rules=rules)
+            mock_http_query.assert_called_with(
+                "http://localhost:1313/v1/acl/create",
+                method="PUT",
+                params={},
+                data='{"Name": "name1", "Rules": [{"node": "host.example.local", "policy": "write"}, {"agent": "host.example.local", "policy": "write"}, {"session": "host.example.local", "policy": "write"}, {"key": "", "policy": "read"}, {"service": "", "policy": "read"}]}',
+                decode=True,
+                status=True,
+                header_dict={"X-Consul-Token": "randomtoken", "Content-Type": "application/json"},
+                opts={"consul": {"url": "http://127.0.0.1", "token": "test_token"}},
+            )
             expected = {"message": f"ACL {name} created.", "res": True}
             assert expected == result
 
