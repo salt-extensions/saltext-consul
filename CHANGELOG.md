@@ -4,7 +4,16 @@ This project uses [Semantic Versioning](https://semver.org/) - MAJOR.MINOR.PATCH
 
 # Changelog
 
-# Saltext.Consul 1.0.0 (2024-01-13)
+## 1.1.0 (2024-02-15)
+
+
+### Fixed
+
+- fixed Rules attribute formatting to allow for proper creation [#7](https://github.com/salt-extensions/saltext-consul/issues/7)
+
+
+## 1.0.0 (2024-01-13)
+
 
 ### Added
 
