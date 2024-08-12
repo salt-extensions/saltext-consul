@@ -26,6 +26,7 @@ requires very little. For example:
 The ``driver`` refers to the Consul module, all other options are optional.
 For option details see: https://python-consul.readthedocs.io/en/latest/#consul
 """
+
 from salt.exceptions import CommandExecutionError
 
 try:

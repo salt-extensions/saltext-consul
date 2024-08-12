@@ -1,6 +1,7 @@
 """
 Test case for the consul state module
 """
+
 import logging
 from unittest.mock import MagicMock
 from unittest.mock import patch

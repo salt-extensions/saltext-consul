@@ -134,6 +134,7 @@ This behavior can be disabled by setting ``expand_keys`` to ``false``.
       - consul: my_consul_config expand_keys=false
 
 """
+
 import logging
 import re
 
@@ -312,7 +313,6 @@ def pillar_format(ret, keys, value, expand_keys):
 
 
 def get_conn(opts, profile):
-
     """
     Return a client object for accessing consul
     """

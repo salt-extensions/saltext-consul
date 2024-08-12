@@ -55,6 +55,7 @@ value to ``consul``:
 .. _`python-consul documentation`: https://python-consul.readthedocs.io/en/latest/#consul
 
 """
+
 import logging
 import time
 

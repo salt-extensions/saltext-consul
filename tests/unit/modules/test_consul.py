@@ -1,6 +1,7 @@
 """
 Test case for the consul execution module
 """
+
 import logging
 from unittest.mock import MagicMock
 from unittest.mock import patch
