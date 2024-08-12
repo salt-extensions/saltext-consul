@@ -1,7 +1,7 @@
 ``saltext-consul``: Integrate Salt with Consul
 ==============================================
 
-Salt Extension for interacting with Consul
+Salt Extension for interacting with HashiCorp Consul
 
 .. toctree::
   :maxdepth: 2

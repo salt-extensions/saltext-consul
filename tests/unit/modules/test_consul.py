@@ -1,16 +1,18 @@
 """
 Test case for the consul execution module
 """
+
 import logging
 from unittest.mock import MagicMock
 from unittest.mock import patch
 
 import pytest
-import salt.modules.consul as consul
 import salt.utils.http
 import salt.utils.json
 import salt.utils.platform
 from salt.exceptions import SaltInvocationError
+
+from saltext.consul.modules import consul
 
 log = logging.getLogger(__name__)
 
@@ -26,9 +28,6 @@ def configure_loader_modules():
 
 
 def test_list():
-    """
-    Test salt.modules.consul.list function
-    """
     mock_query = MagicMock(return_value={"data": ["foo"], "res": True})
     with patch.object(consul, "_query", mock_query):
         consul_return = consul.list_(consul_url="http://127.0.0.1", token="test_token")
@@ -37,9 +36,6 @@ def test_list():
 
 
 def test_get():
-    """
-    Test salt.modules.consul.get function
-    """
     #
     # No key argument results in SaltInvocationError, exception
     #
@@ -114,9 +110,6 @@ def test_get():
 
 
 def test_put():
-    """
-    Test salt.modules.consul.put function
-    """
     #
     # No key argument results in SaltInvocationError, exception
     #
@@ -189,9 +182,6 @@ def test_put():
 
 
 def test_delete():
-    """
-    Test salt.modules.consul.delete function
-    """
     #
     # No key argument results in SaltInvocationError, exception
     #
@@ -233,9 +223,6 @@ def test_delete():
 
 
 def test_agent_maintenance():
-    """
-    Test consul agent maintenance
-    """
     consul_url = "http://localhost:1313"
     key = "cluster/key"
 
@@ -247,7 +234,7 @@ def test_agent_maintenance():
 
     # no consul url error
     with patch.dict(consul.__salt__, {"config.get": mock_nourl}):
-        with patch.object(salt.modules.consul, "session_list", return_value=mock_result):
+        with patch.object(consul, "session_list", return_value=mock_result):
             result = consul.agent_maintenance(consul_url="")
             expected = {"message": "No Consul URL found.", "res": False}
             assert expected == result
@@ -255,7 +242,7 @@ def test_agent_maintenance():
     # no required argument
     with patch.object(salt.utils.http, "query", return_value=mock_http_result):
         with patch.dict(consul.__salt__, {"config.get": mock_url}):
-            with patch.object(salt.modules.consul, "session_list", return_value=mock_result):
+            with patch.object(consul, "session_list", return_value=mock_result):
                 msg = 'Required parameter "enable" is missing.'
                 result = consul.agent_maintenance(consul_url=consul_url)
                 expected = {"message": msg, "res": False}
@@ -263,7 +250,7 @@ def test_agent_maintenance():
 
     with patch.object(salt.utils.http, "query", return_value=mock_http_result):
         with patch.dict(consul.__salt__, {"config.get": mock_url}):
-            with patch.object(salt.modules.consul, "session_list", return_value=mock_result):
+            with patch.object(consul, "session_list", return_value=mock_result):
                 msg = "Agent maintenance mode {}ed."
                 value = "enabl"
                 result = consul.agent_maintenance(consul_url=consul_url, enable=value)
@@ -272,7 +259,7 @@ def test_agent_maintenance():
 
     with patch.object(salt.utils.http, "query", return_value=mock_http_result_false):
         with patch.dict(consul.__salt__, {"config.get": mock_url}):
-            with patch.object(salt.modules.consul, "session_list", return_value=mock_result):
+            with patch.object(consul, "session_list", return_value=mock_result):
                 msg = "Unable to change maintenance mode for agent."
                 value = "enabl"
                 result = consul.agent_maintenance(consul_url=consul_url, enable=value)
@@ -295,7 +282,7 @@ def test_agent_join():
 
     # no consul url error
     with patch.dict(consul.__salt__, {"config.get": mock_nourl}):
-        with patch.object(salt.modules.consul, "session_list", return_value=mock_result):
+        with patch.object(consul, "session_list", return_value=mock_result):
             result = consul.agent_join(consul_url="")
             expected = {"message": "No Consul URL found.", "res": False}
             assert expected == result
@@ -303,13 +290,13 @@ def test_agent_join():
     # no required argument
     with patch.object(salt.utils.http, "query", return_value=mock_http_result):
         with patch.dict(consul.__salt__, {"config.get": mock_url}):
-            with patch.object(salt.modules.consul, "session_list", return_value=mock_result):
+            with patch.object(consul, "session_list", return_value=mock_result):
                 msg = 'Required parameter "address" is missing.'
                 pytest.raises(SaltInvocationError, consul.agent_join, consul_url=consul_url)
 
     with patch.object(salt.utils.http, "query", return_value=mock_http_result):
         with patch.dict(consul.__salt__, {"config.get": mock_url}):
-            with patch.object(salt.modules.consul, "session_list", return_value=mock_result):
+            with patch.object(consul, "session_list", return_value=mock_result):
                 msg = "Agent joined the cluster"
                 result = consul.agent_join(consul_url=consul_url, address="test")
                 expected = {"message": msg, "res": True}
@@ -317,7 +304,7 @@ def test_agent_join():
 
     with patch.object(salt.utils.http, "query", return_value=mock_http_result_false):
         with patch.dict(consul.__salt__, {"config.get": mock_url}):
-            with patch.object(salt.modules.consul, "session_list", return_value=mock_result):
+            with patch.object(consul, "session_list", return_value=mock_result):
                 msg = "Unable to join the cluster."
                 value = "enabl"
                 result = consul.agent_join(consul_url=consul_url, address="test")
@@ -340,7 +327,7 @@ def test_agent_leave():
 
     # no consul url error
     with patch.dict(consul.__salt__, {"config.get": mock_nourl}):
-        with patch.object(salt.modules.consul, "session_list", return_value=mock_result):
+        with patch.object(consul, "session_list", return_value=mock_result):
             result = consul.agent_join(consul_url="")
             expected = {"message": "No Consul URL found.", "res": False}
             assert expected == result
@@ -350,12 +337,12 @@ def test_agent_leave():
     # no required argument
     with patch.object(salt.utils.http, "query", return_value=mock_http_result):
         with patch.dict(consul.__salt__, {"config.get": mock_url}):
-            with patch.object(salt.modules.consul, "session_list", return_value=mock_result):
+            with patch.object(consul, "session_list", return_value=mock_result):
                 pytest.raises(SaltInvocationError, consul.agent_leave, consul_url=consul_url)
 
     with patch.object(salt.utils.http, "query", return_value=mock_http_result):
         with patch.dict(consul.__salt__, {"config.get": mock_url}):
-            with patch.object(salt.modules.consul, "session_list", return_value=mock_result):
+            with patch.object(consul, "session_list", return_value=mock_result):
                 msg = "Node {} put in leave state."
                 result = consul.agent_leave(consul_url=consul_url, node=node)
                 expected = {"message": msg.format(node), "res": True}
@@ -363,7 +350,7 @@ def test_agent_leave():
 
     with patch.object(salt.utils.http, "query", return_value=mock_http_result_false):
         with patch.dict(consul.__salt__, {"config.get": mock_url}):
-            with patch.object(salt.modules.consul, "session_list", return_value=mock_result):
+            with patch.object(consul, "session_list", return_value=mock_result):
                 msg = "Unable to change state for {}."
                 result = consul.agent_leave(consul_url=consul_url, node=node)
                 expected = {"message": msg.format(node), "res": False}
@@ -385,7 +372,7 @@ def test_agent_check_register():
 
     # no consul url error
     with patch.dict(consul.__salt__, {"config.get": mock_nourl}):
-        with patch.object(salt.modules.consul, "session_list", return_value=mock_result):
+        with patch.object(consul, "session_list", return_value=mock_result):
             result = consul.agent_check_register(consul_url="")
             expected = {"message": "No Consul URL found.", "res": False}
             assert expected == result
@@ -395,7 +382,7 @@ def test_agent_check_register():
     # no required arguments
     with patch.object(salt.utils.http, "query", return_value=mock_http_result):
         with patch.dict(consul.__salt__, {"config.get": mock_url}):
-            with patch.object(salt.modules.consul, "session_list", return_value=mock_result):
+            with patch.object(consul, "session_list", return_value=mock_result):
                 pytest.raises(
                     SaltInvocationError,
                     consul.agent_check_register,
@@ -422,7 +409,7 @@ def test_agent_check_register():
 
     with patch.object(salt.utils.http, "query", return_value=mock_http_result):
         with patch.dict(consul.__salt__, {"config.get": mock_url}):
-            with patch.object(salt.modules.consul, "session_list", return_value=mock_result):
+            with patch.object(consul, "session_list", return_value=mock_result):
                 msg = "Check {} added to agent."
                 result = consul.agent_check_register(
                     consul_url=consul_url,
@@ -437,7 +424,7 @@ def test_agent_check_register():
 
     with patch.object(salt.utils.http, "query", return_value=mock_http_result_false):
         with patch.dict(consul.__salt__, {"config.get": mock_url}):
-            with patch.object(salt.modules.consul, "session_list", return_value=mock_result):
+            with patch.object(consul, "session_list", return_value=mock_result):
                 msg = "Unable to add check to agent."
                 result = consul.agent_check_register(
                     consul_url=consul_url,
@@ -466,7 +453,7 @@ def test_agent_check_deregister():
 
     # no consul url error
     with patch.dict(consul.__salt__, {"config.get": mock_nourl}):
-        with patch.object(salt.modules.consul, "session_list", return_value=mock_result):
+        with patch.object(consul, "session_list", return_value=mock_result):
             result = consul.agent_check_register(consul_url="")
             expected = {"message": "No Consul URL found.", "res": False}
             assert expected == result
@@ -476,7 +463,7 @@ def test_agent_check_deregister():
     # no required arguments
     with patch.object(salt.utils.http, "query", return_value=mock_http_result):
         with patch.dict(consul.__salt__, {"config.get": mock_url}):
-            with patch.object(salt.modules.consul, "session_list", return_value=mock_result):
+            with patch.object(consul, "session_list", return_value=mock_result):
                 pytest.raises(
                     SaltInvocationError,
                     consul.agent_check_deregister,
@@ -485,7 +472,7 @@ def test_agent_check_deregister():
 
     with patch.object(salt.utils.http, "query", return_value=mock_http_result):
         with patch.dict(consul.__salt__, {"config.get": mock_url}):
-            with patch.object(salt.modules.consul, "session_list", return_value=mock_result):
+            with patch.object(consul, "session_list", return_value=mock_result):
                 msg = "Check {} removed from agent."
                 result = consul.agent_check_deregister(consul_url=consul_url, checkid=checkid)
                 expected = {"message": msg.format(checkid), "res": True}
@@ -493,7 +480,7 @@ def test_agent_check_deregister():
 
     with patch.object(salt.utils.http, "query", return_value=mock_http_result_false):
         with patch.dict(consul.__salt__, {"config.get": mock_url}):
-            with patch.object(salt.modules.consul, "session_list", return_value=mock_result):
+            with patch.object(consul, "session_list", return_value=mock_result):
                 msg = "Unable to remove check from agent."
                 result = consul.agent_check_deregister(consul_url=consul_url, checkid=checkid)
                 expected = {"message": msg.format(checkid), "res": False}
@@ -515,7 +502,7 @@ def test_agent_check_pass():
 
     # no consul url error
     with patch.dict(consul.__salt__, {"config.get": mock_nourl}):
-        with patch.object(salt.modules.consul, "session_list", return_value=mock_result):
+        with patch.object(consul, "session_list", return_value=mock_result):
             result = consul.agent_check_register(consul_url="")
             expected = {"message": "No Consul URL found.", "res": False}
             assert expected == result
@@ -525,7 +512,7 @@ def test_agent_check_pass():
     # no required arguments
     with patch.object(salt.utils.http, "query", return_value=mock_http_result):
         with patch.dict(consul.__salt__, {"config.get": mock_url}):
-            with patch.object(salt.modules.consul, "session_list", return_value=mock_result):
+            with patch.object(consul, "session_list", return_value=mock_result):
                 pytest.raises(
                     SaltInvocationError,
                     consul.agent_check_pass,
@@ -534,7 +521,7 @@ def test_agent_check_pass():
 
     with patch.object(salt.utils.http, "query", return_value=mock_http_result):
         with patch.dict(consul.__salt__, {"config.get": mock_url}):
-            with patch.object(salt.modules.consul, "session_list", return_value=mock_result):
+            with patch.object(consul, "session_list", return_value=mock_result):
                 msg = "Check {} marked as passing."
                 result = consul.agent_check_pass(consul_url=consul_url, checkid=checkid)
                 expected = {"message": msg.format(checkid), "res": True}
@@ -542,7 +529,7 @@ def test_agent_check_pass():
 
     with patch.object(salt.utils.http, "query", return_value=mock_http_result_false):
         with patch.dict(consul.__salt__, {"config.get": mock_url}):
-            with patch.object(salt.modules.consul, "session_list", return_value=mock_result):
+            with patch.object(consul, "session_list", return_value=mock_result):
                 msg = "Unable to update check {}."
                 result = consul.agent_check_pass(consul_url=consul_url, checkid=checkid)
                 expected = {"message": msg.format(checkid), "res": False}
@@ -564,7 +551,7 @@ def test_agent_check_warn():
 
     # no consul url error
     with patch.dict(consul.__salt__, {"config.get": mock_nourl}):
-        with patch.object(salt.modules.consul, "session_list", return_value=mock_result):
+        with patch.object(consul, "session_list", return_value=mock_result):
             result = consul.agent_check_register(consul_url="")
             expected = {"message": "No Consul URL found.", "res": False}
             assert expected == result
@@ -574,7 +561,7 @@ def test_agent_check_warn():
     # no required arguments
     with patch.object(salt.utils.http, "query", return_value=mock_http_result):
         with patch.dict(consul.__salt__, {"config.get": mock_url}):
-            with patch.object(salt.modules.consul, "session_list", return_value=mock_result):
+            with patch.object(consul, "session_list", return_value=mock_result):
                 pytest.raises(
                     SaltInvocationError,
                     consul.agent_check_warn,
@@ -583,7 +570,7 @@ def test_agent_check_warn():
 
     with patch.object(salt.utils.http, "query", return_value=mock_http_result):
         with patch.dict(consul.__salt__, {"config.get": mock_url}):
-            with patch.object(salt.modules.consul, "session_list", return_value=mock_result):
+            with patch.object(consul, "session_list", return_value=mock_result):
                 msg = "Check {} marked as warning."
                 result = consul.agent_check_warn(consul_url=consul_url, checkid=checkid)
                 expected = {"message": msg.format(checkid), "res": True}
@@ -591,7 +578,7 @@ def test_agent_check_warn():
 
     with patch.object(salt.utils.http, "query", return_value=mock_http_result_false):
         with patch.dict(consul.__salt__, {"config.get": mock_url}):
-            with patch.object(salt.modules.consul, "session_list", return_value=mock_result):
+            with patch.object(consul, "session_list", return_value=mock_result):
                 msg = "Unable to update check {}."
                 result = consul.agent_check_warn(consul_url=consul_url, checkid=checkid)
                 expected = {"message": msg.format(checkid), "res": False}
@@ -613,7 +600,7 @@ def test_agent_check_fail():
 
     # no consul url error
     with patch.dict(consul.__salt__, {"config.get": mock_nourl}):
-        with patch.object(salt.modules.consul, "session_list", return_value=mock_result):
+        with patch.object(consul, "session_list", return_value=mock_result):
             result = consul.agent_check_register(consul_url="")
             expected = {"message": "No Consul URL found.", "res": False}
             assert expected == result
@@ -623,7 +610,7 @@ def test_agent_check_fail():
     # no required arguments
     with patch.object(salt.utils.http, "query", return_value=mock_http_result):
         with patch.dict(consul.__salt__, {"config.get": mock_url}):
-            with patch.object(salt.modules.consul, "session_list", return_value=mock_result):
+            with patch.object(consul, "session_list", return_value=mock_result):
                 pytest.raises(
                     SaltInvocationError,
                     consul.agent_check_fail,
@@ -632,7 +619,7 @@ def test_agent_check_fail():
 
     with patch.object(salt.utils.http, "query", return_value=mock_http_result):
         with patch.dict(consul.__salt__, {"config.get": mock_url}):
-            with patch.object(salt.modules.consul, "session_list", return_value=mock_result):
+            with patch.object(consul, "session_list", return_value=mock_result):
                 msg = "Check {} marked as critical."
                 result = consul.agent_check_fail(consul_url=consul_url, checkid=checkid)
                 expected = {"message": msg.format(checkid), "res": True}
@@ -640,7 +627,7 @@ def test_agent_check_fail():
 
     with patch.object(salt.utils.http, "query", return_value=mock_http_result_false):
         with patch.dict(consul.__salt__, {"config.get": mock_url}):
-            with patch.object(salt.modules.consul, "session_list", return_value=mock_result):
+            with patch.object(consul, "session_list", return_value=mock_result):
                 msg = "Unable to update check {}."
                 result = consul.agent_check_fail(consul_url=consul_url, checkid=checkid)
                 expected = {"message": msg.format(checkid), "res": False}
@@ -662,7 +649,7 @@ def test_agent_service_register():
 
     # no consul url error
     with patch.dict(consul.__salt__, {"config.get": mock_nourl}):
-        with patch.object(salt.modules.consul, "session_list", return_value=mock_result):
+        with patch.object(consul, "session_list", return_value=mock_result):
             result = consul.agent_service_register(consul_url="")
             expected = {"message": "No Consul URL found.", "res": False}
             assert expected == result
@@ -672,7 +659,7 @@ def test_agent_service_register():
     # no required arguments
     with patch.object(salt.utils.http, "query", return_value=mock_http_result):
         with patch.dict(consul.__salt__, {"config.get": mock_url}):
-            with patch.object(salt.modules.consul, "session_list", return_value=mock_result):
+            with patch.object(consul, "session_list", return_value=mock_result):
                 pytest.raises(
                     SaltInvocationError,
                     consul.agent_service_register,
@@ -681,7 +668,7 @@ def test_agent_service_register():
 
     with patch.object(salt.utils.http, "query", return_value=mock_http_result):
         with patch.dict(consul.__salt__, {"config.get": mock_url}):
-            with patch.object(salt.modules.consul, "session_list", return_value=mock_result):
+            with patch.object(consul, "session_list", return_value=mock_result):
                 msg = "Service {} registered on agent."
                 result = consul.agent_service_register(
                     consul_url=consul_url,
@@ -696,7 +683,7 @@ def test_agent_service_register():
 
     with patch.object(salt.utils.http, "query", return_value=mock_http_result_false):
         with patch.dict(consul.__salt__, {"config.get": mock_url}):
-            with patch.object(salt.modules.consul, "session_list", return_value=mock_result):
+            with patch.object(consul, "session_list", return_value=mock_result):
                 msg = "Unable to register service {}."
                 result = consul.agent_service_register(
                     consul_url=consul_url,
@@ -725,7 +712,7 @@ def test_agent_service_deregister():
 
     # no consul url error
     with patch.dict(consul.__salt__, {"config.get": mock_nourl}):
-        with patch.object(salt.modules.consul, "session_list", return_value=mock_result):
+        with patch.object(consul, "session_list", return_value=mock_result):
             result = consul.agent_service_deregister(consul_url="")
             expected = {"message": "No Consul URL found.", "res": False}
             assert expected == result
@@ -735,7 +722,7 @@ def test_agent_service_deregister():
     # no required arguments
     with patch.object(salt.utils.http, "query", return_value=mock_http_result):
         with patch.dict(consul.__salt__, {"config.get": mock_url}):
-            with patch.object(salt.modules.consul, "session_list", return_value=mock_result):
+            with patch.object(consul, "session_list", return_value=mock_result):
                 pytest.raises(
                     SaltInvocationError,
                     consul.agent_service_deregister,
@@ -744,7 +731,7 @@ def test_agent_service_deregister():
 
     with patch.object(salt.utils.http, "query", return_value=mock_http_result):
         with patch.dict(consul.__salt__, {"config.get": mock_url}):
-            with patch.object(salt.modules.consul, "session_list", return_value=mock_result):
+            with patch.object(consul, "session_list", return_value=mock_result):
                 msg = "Service {} removed from agent."
                 result = consul.agent_service_deregister(consul_url=consul_url, serviceid=serviceid)
                 expected = {"message": msg.format(serviceid), "res": True}
@@ -752,7 +739,7 @@ def test_agent_service_deregister():
 
     with patch.object(salt.utils.http, "query", return_value=mock_http_result_false):
         with patch.dict(consul.__salt__, {"config.get": mock_url}):
-            with patch.object(salt.modules.consul, "session_list", return_value=mock_result):
+            with patch.object(consul, "session_list", return_value=mock_result):
                 msg = "Unable to remove service {}."
                 result = consul.agent_service_deregister(consul_url=consul_url, serviceid=serviceid)
                 expected = {"message": msg.format(serviceid), "res": False}
@@ -774,7 +761,7 @@ def test_agent_service_maintenance():
 
     # no consul url error
     with patch.dict(consul.__salt__, {"config.get": mock_nourl}):
-        with patch.object(salt.modules.consul, "session_list", return_value=mock_result):
+        with patch.object(consul, "session_list", return_value=mock_result):
             result = consul.agent_service_maintenance(consul_url="")
             expected = {"message": "No Consul URL found.", "res": False}
             assert expected == result
@@ -784,7 +771,7 @@ def test_agent_service_maintenance():
     # no required arguments
     with patch.object(salt.utils.http, "query", return_value=mock_http_result):
         with patch.dict(consul.__salt__, {"config.get": mock_url}):
-            with patch.object(salt.modules.consul, "session_list", return_value=mock_result):
+            with patch.object(consul, "session_list", return_value=mock_result):
                 pytest.raises(
                     SaltInvocationError,
                     consul.agent_service_maintenance,
@@ -801,7 +788,7 @@ def test_agent_service_maintenance():
 
     with patch.object(salt.utils.http, "query", return_value=mock_http_result):
         with patch.dict(consul.__salt__, {"config.get": mock_url}):
-            with patch.object(salt.modules.consul, "session_list", return_value=mock_result):
+            with patch.object(consul, "session_list", return_value=mock_result):
                 msg = "Service {} set in maintenance mode."
                 result = consul.agent_service_maintenance(
                     consul_url=consul_url, serviceid=serviceid, enable=True
@@ -811,7 +798,7 @@ def test_agent_service_maintenance():
 
     with patch.object(salt.utils.http, "query", return_value=mock_http_result_false):
         with patch.dict(consul.__salt__, {"config.get": mock_url}):
-            with patch.object(salt.modules.consul, "session_list", return_value=mock_result):
+            with patch.object(consul, "session_list", return_value=mock_result):
                 msg = "Unable to set service {} to maintenance mode."
                 result = consul.agent_service_maintenance(
                     consul_url=consul_url, serviceid=serviceid, enable=True
@@ -835,7 +822,7 @@ def test_session_create():
 
     # no consul url error
     with patch.dict(consul.__salt__, {"config.get": mock_nourl}):
-        with patch.object(salt.modules.consul, "session_list", return_value=mock_result):
+        with patch.object(consul, "session_list", return_value=mock_result):
             result = consul.session_create(consul_url="")
             expected = {"message": "No Consul URL found.", "res": False}
             assert expected == result
@@ -845,7 +832,7 @@ def test_session_create():
     # no required arguments
     with patch.object(salt.utils.http, "query", return_value=mock_http_result):
         with patch.dict(consul.__salt__, {"config.get": mock_url}):
-            with patch.object(salt.modules.consul, "session_list", return_value=mock_result):
+            with patch.object(consul, "session_list", return_value=mock_result):
                 pytest.raises(
                     SaltInvocationError,
                     consul.session_create,
@@ -854,7 +841,7 @@ def test_session_create():
 
     with patch.object(salt.utils.http, "query", return_value=mock_http_result):
         with patch.dict(consul.__salt__, {"config.get": mock_url}):
-            with patch.object(salt.modules.consul, "session_list", return_value=mock_result):
+            with patch.object(consul, "session_list", return_value=mock_result):
                 msg = "Created session {}."
                 result = consul.session_create(consul_url=consul_url, name=name)
                 expected = {"message": msg.format(name), "res": True}
@@ -862,7 +849,7 @@ def test_session_create():
 
     with patch.object(salt.utils.http, "query", return_value=mock_http_result_false):
         with patch.dict(consul.__salt__, {"config.get": mock_url}):
-            with patch.object(salt.modules.consul, "session_list", return_value=mock_result):
+            with patch.object(consul, "session_list", return_value=mock_result):
                 msg = "Unable to create session {}."
                 result = consul.session_create(consul_url=consul_url, name=name)
                 expected = {"message": msg.format(name), "res": False}
@@ -1508,8 +1495,9 @@ def test_acl_create():
                 "http://localhost:1313/v1/acl/create",
                 method="PUT",
                 params={},
-                data='{"Name": "name1", "Rules": [{"node": "host.example.local", "policy": "write"}, {"agent": "host.example.local", "policy": "write"}, {"session": "host.example.local", "policy": "write"}, {"key": "", "policy": "read"}, {"service": "", "policy": "read"}]}',
+                data='{"Name": "name1", "Rules": "node \\"host.example.local\\" {\\n  policy = \\"write\\"\\n}\\nagent \\"host.example.local\\" {\\n  policy = \\"write\\"\\n}\\nsession \\"host.example.local\\" {\\n  policy = \\"write\\"\\n}\\nkey \\"\\" {\\n  policy = \\"read\\"\\n}\\nservice \\"\\" {\\n  policy = \\"read\\"\\n}\\n"}',
                 decode=True,
+                text=False,
                 status=True,
                 header_dict={"X-Consul-Token": "randomtoken", "Content-Type": "application/json"},
                 opts={"consul": {"url": "http://127.0.0.1", "token": "test_token"}},

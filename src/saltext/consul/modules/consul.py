@@ -4,6 +4,7 @@ Interact with Consul
 https://www.consul.io
 
 """
+
 import base64
 import http.client
 import logging
@@ -298,10 +299,10 @@ def put(consul_url=None, token=None, key=None, value=None, **kwargs):
 
     if "acquire" in kwargs:
         if kwargs["acquire"] not in available_sessions:
-            ret[
-                "message"
-            ] = "{} is not a valid session.".format(  # pylint: disable=consider-using-f-string
-                kwargs["acquire"]
+            ret["message"] = (
+                "{} is not a valid session.".format(  # pylint: disable=consider-using-f-string
+                    kwargs["acquire"]
+                )
             )
             ret["res"] = False
             return ret
@@ -319,10 +320,10 @@ def put(consul_url=None, token=None, key=None, value=None, **kwargs):
                     return ret
 
             else:
-                ret[
-                    "message"
-                ] = "{} is not a valid session.".format(  # pylint: disable=consider-using-f-string
-                    kwargs["acquire"]
+                ret["message"] = (
+                    "{} is not a valid session.".format(  # pylint: disable=consider-using-f-string
+                        kwargs["acquire"]
+                    )
                 )
                 ret["res"] = False
         else:
@@ -598,10 +599,10 @@ def agent_maintenance(consul_url=None, token=None, **kwargs):
     )
     if res["res"]:
         ret["res"] = True
-        ret[
-            "message"
-        ] = "Agent maintenance mode {}ed.".format(  # pylint: disable=consider-using-f-string
-            kwargs["enable"]
+        ret["message"] = (
+            "Agent maintenance mode {}ed.".format(  # pylint: disable=consider-using-f-string
+                kwargs["enable"]
+            )
         )
     else:
         ret["res"] = True
@@ -780,10 +781,10 @@ def agent_check_register(consul_url=None, token=None, **kwargs):
 
     if res["res"]:
         ret["res"] = True
-        ret[
-            "message"
-        ] = "Check {} added to agent.".format(  # pylint: disable=consider-using-f-string
-            kwargs["name"]
+        ret["message"] = (
+            "Check {} added to agent.".format(  # pylint: disable=consider-using-f-string
+                kwargs["name"]
+            )
         )
     else:
         ret["res"] = False
@@ -1095,17 +1096,17 @@ def agent_service_register(consul_url=None, token=None, decode=False, text=True,
     )
     if res["res"]:
         ret["res"] = True
-        ret[
-            "message"
-        ] = "Service {} registered on agent.".format(  # pylint: disable=consider-using-f-string
-            kwargs["name"]
+        ret["message"] = (
+            "Service {} registered on agent.".format(  # pylint: disable=consider-using-f-string
+                kwargs["name"]
+            )
         )
     else:
         ret["res"] = False
-        ret[
-            "message"
-        ] = "Unable to register service {}.".format(  # pylint: disable=consider-using-f-string
-            kwargs["name"]
+        ret["message"] = (
+            "Unable to register service {}.".format(  # pylint: disable=consider-using-f-string
+                kwargs["name"]
+            )
         )
     return ret
 
@@ -1287,10 +1288,10 @@ def session_create(consul_url=None, token=None, **kwargs):
         )
     else:
         ret["res"] = False
-        ret[
-            "message"
-        ] = "Unable to create session {}.".format(  # pylint: disable=consider-using-f-string
-            kwargs["name"]
+        ret["message"] = (
+            "Unable to create session {}.".format(  # pylint: disable=consider-using-f-string
+                kwargs["name"]
+            )
         )
     return ret
 
@@ -1581,17 +1582,17 @@ def catalog_register(consul_url=None, token=None, **kwargs):
     res = _query(consul_url=consul_url, function=function, token=token, method="PUT", data=data)
     if res["res"]:
         ret["res"] = True
-        ret[
-            "message"
-        ] = "Catalog registration for {} successful.".format(  # pylint: disable=consider-using-f-string
-            kwargs["node"]
+        ret["message"] = (
+            "Catalog registration for {} successful.".format(  # pylint: disable=consider-using-f-string
+                kwargs["node"]
+            )
         )
     else:
         ret["res"] = False
-        ret[
-            "message"
-        ] = "Catalog registration for {} failed.".format(  # pylint: disable=consider-using-f-string
-            kwargs["node"]
+        ret["message"] = (
+            "Catalog registration for {} failed.".format(  # pylint: disable=consider-using-f-string
+                kwargs["node"]
+            )
         )
     ret["data"] = data
     return ret
@@ -1647,17 +1648,17 @@ def catalog_deregister(consul_url=None, token=None, **kwargs):
 
     if res["res"]:
         ret["res"] = True
-        ret[
-            "message"
-        ] = "Catalog item {} removed.".format(  # pylint: disable=consider-using-f-string
-            kwargs["node"]
+        ret["message"] = (
+            "Catalog item {} removed.".format(  # pylint: disable=consider-using-f-string
+                kwargs["node"]
+            )
         )
     else:
         ret["res"] = False
-        ret[
-            "message"
-        ] = "Removing Catalog item {} failed.".format(  # pylint: disable=consider-using-f-string
-            kwargs["node"]
+        ret["message"] = (
+            "Removing Catalog item {} failed.".format(  # pylint: disable=consider-using-f-string
+                kwargs["node"]
+            )
         )
     return ret
 
@@ -2126,10 +2127,10 @@ def acl_create(consul_url=None, token=None, **kwargs):
         )
     else:
         ret["res"] = False
-        ret[
-            "message"
-        ] = "Removing Catalog item {} failed.".format(  # pylint: disable=consider-using-f-string
-            kwargs["name"]
+        ret["message"] = (
+            "Removing Catalog item {} failed.".format(  # pylint: disable=consider-using-f-string
+                kwargs["name"]
+            )
         )
     return ret
 
@@ -2193,10 +2194,10 @@ def acl_update(consul_url=None, token=None, **kwargs):
         )
     else:
         ret["res"] = False
-        ret[
-            "message"
-        ] = "Updating ACL {} failed.".format(  # pylint: disable=consider-using-f-string
-            kwargs["name"]
+        ret["message"] = (
+            "Updating ACL {} failed.".format(  # pylint: disable=consider-using-f-string
+                kwargs["name"]
+            )
         )
 
     return ret
@@ -2242,10 +2243,10 @@ def acl_delete(consul_url=None, token=None, **kwargs):
         )
     else:
         ret["res"] = False
-        ret[
-            "message"
-        ] = "Removing ACL {} failed.".format(  # pylint: disable=consider-using-f-string
-            kwargs["id"]
+        ret["message"] = (
+            "Removing ACL {} failed.".format(  # pylint: disable=consider-using-f-string
+                kwargs["id"]
+            )
         )
         ret["changes"] = res
 
@@ -2328,10 +2329,10 @@ def acl_clone(consul_url=None, token=None, **kwargs):
         ret["ID"] = res["data"]
     else:
         ret["res"] = False
-        ret[
-            "message"
-        ] = "Cloning ACL item {} failed.".format(  # pylint: disable=consider-using-f-string
-            kwargs["name"]
+        ret["message"] = (
+            "Cloning ACL item {} failed.".format(  # pylint: disable=consider-using-f-string
+                kwargs["name"]
+            )
         )
     return ret
 
@@ -2425,10 +2426,10 @@ def event_fire(consul_url=None, token=None, name=None, **kwargs):
         ret["data"] = res["data"]
     else:
         ret["res"] = False
-        ret[
-            "message"
-        ] = "Cloning ACL item {} failed.".format(  # pylint: disable=consider-using-f-string
-            kwargs["name"]
+        ret["message"] = (
+            "Cloning ACL item {} failed.".format(  # pylint: disable=consider-using-f-string
+                kwargs["name"]
+            )
         )
     return ret
 

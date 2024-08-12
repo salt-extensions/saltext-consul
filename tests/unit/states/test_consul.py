@@ -1,12 +1,14 @@
 """
 Test case for the consul state module
 """
+
 import logging
 from unittest.mock import MagicMock
 from unittest.mock import patch
 
 import pytest
-import salt.states.consul as consul
+
+from saltext.consul.states import consul
 
 log = logging.getLogger(__name__)
 
@@ -25,9 +27,6 @@ def configure_loader_modules():
 
 
 def test_acl_present():
-    """
-    Test salt.states.consul.acl_present function
-    """
     acl_info = {
         "data": [
             {
@@ -87,9 +86,6 @@ def test_acl_present():
 
 
 def test_acl_absent():
-    """
-    Test salt.states.consul.acl_absent function
-    """
     #
     # Test when the ACL does exist
     #

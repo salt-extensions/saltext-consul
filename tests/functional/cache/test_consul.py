@@ -13,12 +13,6 @@ docker = pytest.importorskip("docker")
 
 log = logging.getLogger(__name__)
 
-pytestmark = [
-    pytest.mark.skip_on_fips_enabled_platform,
-    pytest.mark.slow_test,
-    pytest.mark.skip_if_binaries_missing("dockerd"),
-]
-
 
 def confirm_consul_is_ready(timeout_at, container):
     sleeptime = 0.1

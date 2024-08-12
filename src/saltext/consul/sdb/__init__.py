@@ -1,3 +1,0 @@
-"""
-SDB Module Directory
-"""

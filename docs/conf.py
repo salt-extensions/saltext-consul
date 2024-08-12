@@ -42,12 +42,12 @@ dist = distribution("saltext.consul")
 
 # -- Project information -----------------------------------------------------
 this_year = datetime.datetime.today().year
-if this_year == 2021:
-    copyright_year = 2021
+if this_year == 2024:
+    copyright_year = "2024"
 else:
-    copyright_year = f"2021 - {this_year}"
+    copyright_year = f"2024 - {this_year}"
 project = dist.metadata["Summary"]
-author = dist.metadata["Author"]
+author = dist.metadata.get("Author")
 
 if author is None:
     # Core metadata is serialized differently with pyproject.toml:
@@ -94,6 +94,7 @@ extensions = [
     "sphinx.ext.coverage",
     "sphinx_copybutton",
     "sphinxcontrib.spelling",
+    "saltdomain",
     "sphinxcontrib.towncrier.ext",
     "myst_parser",
     "sphinx_inline_tabs",
