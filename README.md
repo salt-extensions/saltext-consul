@@ -1,17 +1,17 @@
-# Salt Extension for Consul
+# Salt Extension for HashiCorp Consul
 
-Salt Extension for interacting with Consul
+Salt Extension for interacting with HashiCorp Consul
 
 ## Security
 
-If you think you've found a security vulnerability, see
+If you think you have found a security vulnerability, see
 [Salt's security guide][security].
 
 ## User Documentation
 
 This README is for people aiming to contribute to the project.
 If you just want to get started with the extension, check out the
-module docstrings (for now, documentation is coming!).
+[User Documentation][docs].
 
 ## Contributing
 
@@ -64,11 +64,11 @@ these areas:
 You could also contribute in other ways:
 
 * Writing blog posts
-* Posting on social media about how you used Salt+Consul to solve your
+* Posting on social media about how you used Salt + HashiCorp Consul to solve your
   problems, including videos
 * Giving talks at conferences
 * Publishing videos
-* Asking/answering questions in IRC, Slack, or email groups
+* Asking/answering questions in IRC, Discord or email groups
 
 Any of these things are super valuable to our community, and we sincerely
 appreciate every contribution!
@@ -84,3 +84,4 @@ that's where you'll find the rest of the documentation.
 [PRs]: https://github.com/salt-extensions/saltext-consul/pulls
 [discussions]: https://github.com/salt-extensions/saltext-consul/discussions
 [comments]: https://conventionalcomments.org/
+[docs]: https://salt-extensions.github.io/saltext-consul/
