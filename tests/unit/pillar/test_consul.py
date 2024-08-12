@@ -2,7 +2,8 @@ from unittest.mock import MagicMock
 from unittest.mock import patch
 
 import pytest
-import salt.pillar.consul_pillar as consul_pillar
+
+from saltext.consul.pillar import consul_pillar
 
 pytestmark = [
     pytest.mark.skipif(not consul_pillar.consul, reason="python-consul module not installed")
