@@ -140,7 +140,6 @@ def test_put():
                 key="web/key1",
                 value="Hello world",
             )
-    expected_res = (False,)
     expected_data = "Unable to add key web/key1 with value Hello world."
     if salt.utils.platform.is_windows():
         expected_error = "Unknown error"
@@ -197,7 +196,6 @@ def test_delete():
         key="web/key1",
         value="Hello world",
     )
-    expected_res = (False,)
     expected_data = "Unable to delete key web/key1."
     if salt.utils.platform.is_windows():
         expected_error = "Unknown error"
@@ -224,7 +222,6 @@ def test_delete():
 
 def test_agent_maintenance():
     consul_url = "http://localhost:1313"
-    key = "cluster/key"
 
     mock_result = "test"
     mock_http_result = {"status": 200, "dict": mock_result}
@@ -272,7 +269,6 @@ def test_agent_join():
     Test consul agent join
     """
     consul_url = "http://localhost:1313"
-    key = "cluster/key"
 
     mock_result = "test"
     mock_http_result = {"status": 200, "dict": mock_result}
@@ -306,7 +302,6 @@ def test_agent_join():
         with patch.dict(consul.__salt__, {"config.get": mock_url}):
             with patch.object(consul, "session_list", return_value=mock_result):
                 msg = "Unable to join the cluster."
-                value = "enabl"
                 result = consul.agent_join(consul_url=consul_url, address="test")
                 expected = {"message": msg, "res": False}
                 assert expected == result
@@ -317,7 +312,6 @@ def test_agent_leave():
     Test consul agent leave
     """
     consul_url = "http://localhost:1313"
-    key = "cluster/key"
 
     mock_result = "test"
     mock_http_result = {"status": 200, "dict": mock_result}
@@ -362,7 +356,6 @@ def test_agent_check_register():
     Test consul agent check register
     """
     consul_url = "http://localhost:1313"
-    key = "cluster/key"
 
     mock_result = "test"
     mock_http_result = {"status": 200, "dict": mock_result}
@@ -443,7 +436,6 @@ def test_agent_check_deregister():
     Test consul agent check register
     """
     consul_url = "http://localhost:1313"
-    key = "cluster/key"
 
     mock_result = "test"
     mock_http_result = {"status": 200, "dict": mock_result}
@@ -492,7 +484,6 @@ def test_agent_check_pass():
     Test consul agent check pass
     """
     consul_url = "http://localhost:1313"
-    key = "cluster/key"
 
     mock_result = "test"
     mock_http_result = {"status": 200, "dict": mock_result}
@@ -541,7 +532,6 @@ def test_agent_check_warn():
     Test consul agent check warn
     """
     consul_url = "http://localhost:1313"
-    key = "cluster/key"
 
     mock_result = "test"
     mock_http_result = {"status": 200, "dict": mock_result}
@@ -590,7 +580,6 @@ def test_agent_check_fail():
     Test consul agent check warn
     """
     consul_url = "http://localhost:1313"
-    key = "cluster/key"
 
     mock_result = "test"
     mock_http_result = {"status": 200, "dict": mock_result}
@@ -639,7 +628,6 @@ def test_agent_service_register():
     Test consul agent service register
     """
     consul_url = "http://localhost:1313"
-    key = "cluster/key"
 
     mock_result = "test"
     mock_http_result = {"status": 200, "dict": mock_result}
@@ -702,7 +690,6 @@ def test_agent_service_deregister():
     Test consul agent service deregister
     """
     consul_url = "http://localhost:1313"
-    key = "cluster/key"
 
     mock_result = "test"
     mock_http_result = {"status": 200, "dict": mock_result}
@@ -751,7 +738,6 @@ def test_agent_service_maintenance():
     Test consul agent service maintenance
     """
     consul_url = "http://localhost:1313"
-    key = "cluster/key"
 
     mock_result = "test"
     mock_http_result = {"status": 200, "dict": mock_result}
@@ -812,7 +798,6 @@ def test_session_create():
     Test consul session create
     """
     consul_url = "http://localhost:1313"
-    key = "cluster/key"
 
     mock_result = "test"
     mock_http_result = {"status": 200, "dict": mock_result}
@@ -861,7 +846,6 @@ def test_session_list():
     Test consul session list
     """
     consul_url = "http://localhost:1313"
-    key = "cluster/key"
 
     mock_result = "test"
     mock_http_result = {"status": 200, "dict": mock_result}
@@ -886,7 +870,6 @@ def test_session_destroy():
     Test consul session destroy
     """
     consul_url = "http://localhost:1313"
-    key = "cluster/key"
 
     mock_result = "test"
     mock_http_result = {"status": 200, "dict": mock_result}
@@ -894,7 +877,6 @@ def test_session_destroy():
     mock_nourl = MagicMock(return_value=None)
 
     session = "sid1"
-    name = "test"
 
     # no consul url error
     with patch.dict(consul.__salt__, {"config.get": mock_nourl}):
@@ -1033,7 +1015,6 @@ def test_catalog_deregister():
     consul_url = "http://localhost:1313"
     token = "randomtoken"
     node = "node1"
-    address = "addres1"
     serviceid = "server1"
     checkid = "check1"
 
@@ -1081,7 +1062,6 @@ def test_catalog_datacenters():
 
     mock_result = "test"
     mock_http_result = {"status": 200, "dict": mock_result}
-    mock_http_result_false = {"status": 204, "dict": mock_result}
     mock_url = MagicMock(return_value=consul_url)
     mock_nourl = MagicMock(return_value=None)
 
@@ -1107,7 +1087,6 @@ def test_catalog_nodes():
 
     mock_result = "test"
     mock_http_result = {"status": 200, "dict": mock_result}
-    mock_http_result_false = {"status": 204, "dict": mock_result}
     mock_url = MagicMock(return_value=consul_url)
     mock_nourl = MagicMock(return_value=None)
 
@@ -1133,7 +1112,6 @@ def test_catalog_services():
 
     mock_result = "test"
     mock_http_result = {"status": 200, "dict": mock_result}
-    mock_http_result_false = {"status": 204, "dict": mock_result}
     mock_url = MagicMock(return_value=consul_url)
     mock_nourl = MagicMock(return_value=None)
 
@@ -1160,7 +1138,6 @@ def test_catalog_service():
 
     mock_result = "test"
     mock_http_result = {"status": 200, "dict": mock_result}
-    mock_http_result_false = {"status": 204, "dict": mock_result}
     mock_url = MagicMock(return_value=consul_url)
     mock_nourl = MagicMock(return_value=None)
 
@@ -1196,7 +1173,6 @@ def test_catalog_node():
 
     mock_result = "test"
     mock_http_result = {"status": 200, "dict": mock_result}
-    mock_http_result_false = {"status": 204, "dict": mock_result}
     mock_url = MagicMock(return_value=consul_url)
     mock_nourl = MagicMock(return_value=None)
 
@@ -1232,7 +1208,6 @@ def test_health_node():
 
     mock_result = "test"
     mock_http_result = {"status": 200, "dict": mock_result}
-    mock_http_result_false = {"status": 204, "dict": mock_result}
     mock_url = MagicMock(return_value=consul_url)
     mock_nourl = MagicMock(return_value=None)
 
@@ -1268,7 +1243,6 @@ def test_health_checks():
 
     mock_result = "test"
     mock_http_result = {"status": 200, "dict": mock_result}
-    mock_http_result_false = {"status": 204, "dict": mock_result}
     mock_url = MagicMock(return_value=consul_url)
     mock_nourl = MagicMock(return_value=None)
 
@@ -1304,7 +1278,6 @@ def test_health_service():
 
     mock_result = "test"
     mock_http_result = {"status": 200, "dict": mock_result}
-    mock_http_result_false = {"status": 204, "dict": mock_result}
     mock_url = MagicMock(return_value=consul_url)
     mock_nourl = MagicMock(return_value=None)
 
@@ -1340,7 +1313,6 @@ def test_health_state():
 
     mock_result = "test"
     mock_http_result = {"status": 200, "dict": mock_result}
-    mock_http_result_false = {"status": 204, "dict": mock_result}
     mock_url = MagicMock(return_value=consul_url)
     mock_nourl = MagicMock(return_value=None)
 
@@ -1386,7 +1358,6 @@ def test_status_leader():
 
     mock_result = "test"
     mock_http_result = {"status": 200, "dict": mock_result}
-    mock_http_result_false = {"status": 204, "dict": mock_result}
     mock_url = MagicMock(return_value=consul_url)
     mock_nourl = MagicMock(return_value=None)
 
@@ -1412,7 +1383,6 @@ def test_status_peers():
 
     mock_result = "test"
     mock_http_result = {"status": 200, "dict": mock_result}
-    mock_http_result_false = {"status": 204, "dict": mock_result}
     mock_url = MagicMock(return_value=consul_url)
     mock_nourl = MagicMock(return_value=None)
 
@@ -1439,7 +1409,6 @@ def test_acl_create():
 
     mock_result = "test"
     mock_http_result = {"status": 200, "dict": mock_result}
-    mock_http_result_false = {"status": 204, "dict": mock_result}
     mock_url = MagicMock(return_value=consul_url)
     mock_nourl = MagicMock(return_value=None)
 
@@ -1517,7 +1486,6 @@ def test_acl_update():
 
     mock_result = "test"
     mock_http_result = {"status": 200, "dict": mock_result}
-    mock_http_result_false = {"status": 204, "dict": mock_result}
     mock_url = MagicMock(return_value=consul_url)
     mock_nourl = MagicMock(return_value=None)
 
@@ -1564,7 +1532,6 @@ def test_acl_delete():
 
     mock_result = "test"
     mock_http_result = {"status": 200, "dict": mock_result}
-    mock_http_result_false = {"status": 204, "dict": mock_result}
     mock_url = MagicMock(return_value=consul_url)
     mock_nourl = MagicMock(return_value=None)
 
@@ -1602,7 +1569,6 @@ def test_acl_info():
 
     mock_result = "test"
     mock_http_result = {"status": 200, "dict": mock_result}
-    mock_http_result_false = {"status": 204, "dict": mock_result}
     mock_url = MagicMock(return_value=consul_url)
     mock_nourl = MagicMock(return_value=None)
 
@@ -1640,7 +1606,6 @@ def test_acl_clone():
 
     mock_result = aclid
     mock_http_result = {"status": 200, "dict": mock_result}
-    mock_http_result_false = {"status": 204, "dict": mock_result}
     mock_url = MagicMock(return_value=consul_url)
     mock_nourl = MagicMock(return_value=None)
 
@@ -1682,7 +1647,6 @@ def test_acl_list():
 
     mock_result = aclid
     mock_http_result = {"status": 200, "dict": mock_result}
-    mock_http_result_false = {"status": 204, "dict": mock_result}
     mock_url = MagicMock(return_value=consul_url)
     mock_nourl = MagicMock(return_value=None)
 
@@ -1709,7 +1673,6 @@ def test_event_fire():
 
     mock_result = "test"
     mock_http_result = {"status": 200, "dict": mock_result}
-    mock_http_result_false = {"status": 204, "dict": mock_result}
     mock_url = MagicMock(return_value=consul_url)
     mock_nourl = MagicMock(return_value=None)
 
@@ -1749,7 +1712,6 @@ def test_event_list():
 
     mock_result = "test"
     mock_http_result = {"status": 200, "dict": mock_result}
-    mock_http_result_false = {"status": 204, "dict": mock_result}
     mock_url = MagicMock(return_value=consul_url)
     mock_nourl = MagicMock(return_value=None)
 

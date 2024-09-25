@@ -77,7 +77,7 @@ def _query(
         data = None
     else:
         if data is not None:
-            if type(data) != str:
+            if not isinstance(data, str):
                 data = salt.utils.json.dumps(data)
         else:
             data = salt.utils.json.dumps({})
@@ -1027,7 +1027,7 @@ def agent_service_register(consul_url=None, token=None, decode=False, text=True,
             ret["res"] = False
             return ret
 
-    lc_kwargs = dict()
+    lc_kwargs = {}
     for k, v in kwargs.items():
         lc_kwargs[k.lower()] = v
 
@@ -1055,11 +1055,11 @@ def agent_service_register(consul_url=None, token=None, decode=False, text=True,
         data["EnableTagOverride"] = lc_kwargs["enabletagoverride"]
 
     if "check" in lc_kwargs:
-        dd = dict()
+        dd = {}
         for k, v in lc_kwargs["check"].items():
             dd[k.lower()] = v
         interval_required = False
-        check_dd = dict()
+        check_dd = {}
 
         if "script" in dd:
             interval_required = True
@@ -1111,7 +1111,7 @@ def agent_service_register(consul_url=None, token=None, decode=False, text=True,
     return ret
 
 
-def agent_service_deregister(consul_url=None, token=None, serviceid=None, decode=False, text=True):
+def agent_service_deregister(consul_url=None, token=None, serviceid=None, decode=True, text=False):
     """
     Used to remove a service.
 
@@ -1142,7 +1142,15 @@ def agent_service_deregister(consul_url=None, token=None, serviceid=None, decode
         raise SaltInvocationError('Required argument "serviceid" is missing.')
 
     function = f"agent/service/deregister/{serviceid}"
-    res = _query(consul_url=consul_url, function=function, token=token, method="PUT", data=data)
+    res = _query(
+        consul_url=consul_url,
+        function=function,
+        token=token,
+        method="PUT",
+        data=data,
+        decode=decode,
+        text=text,
+    )
     if res["res"]:
         ret["res"] = True
         ret["message"] = f"Service {serviceid} removed from agent."
@@ -2337,6 +2345,7 @@ def acl_clone(consul_url=None, token=None, **kwargs):
     return ret
 
 
+# pylint: disable=unused-argument
 def acl_list(consul_url=None, token=None, **kwargs):
     """
     List the ACL tokens.
@@ -2366,6 +2375,7 @@ def acl_list(consul_url=None, token=None, **kwargs):
     return ret
 
 
+# pylint: disable=consider-using-get
 def event_fire(consul_url=None, token=None, name=None, **kwargs):
     """
     List the ACL tokens.
