@@ -71,8 +71,8 @@ except ImportError:
 
 
 log = logging.getLogger(__name__)
-api = None
-_tstamp_suffix = ".tstamp"
+api = None  # pylint: disable=invalid-name
+_tstamp_suffix = ".tstamp"  # pylint: disable=invalid-name
 
 
 # Define the module's virtual name
@@ -102,7 +102,7 @@ def __virtual__():
     }
 
     try:
-        global api, _tstamp_suffix
+        global api, _tstamp_suffix  # pylint: disable=global-statement
         _tstamp_suffix = __opts__.get("consul.timestamp_suffix", _tstamp_suffix)
         api = consul.Consul(**consul_kwargs)
     except AttributeError:
