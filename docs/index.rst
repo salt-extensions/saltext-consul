@@ -1,5 +1,5 @@
-``saltext-consul``: Integrate Salt with Consul
-==============================================
+``saltext-consul``: Integrate Salt with HashiCorp Consul
+========================================================
 
 Salt Extension for interacting with HashiCorp Consul
 
