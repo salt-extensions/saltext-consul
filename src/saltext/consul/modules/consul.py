@@ -8,7 +8,7 @@ https://www.consul.io
 import base64
 import http.client
 import logging
-import urllib
+import urllib.parse
 
 import salt.utils.http
 import salt.utils.json
@@ -211,13 +211,12 @@ def get(consul_url=None, key=None, token=None, recurse=False, decode=False, raw=
         query_params["raw"] = True
     ret = _query(consul_url=consul_url, function=function, token=token, query_params=query_params)
 
-    if ret["res"]:
-        if decode:
-            for item in ret["data"]:
-                if item["Value"] is not None:
-                    item["Value"] = base64.b64decode(item["Value"])
-                else:
-                    item["Value"] = ""
+    if ret["res"] and decode:
+        for item in ret["data"]:
+            if item["Value"] is not None:
+                item["Value"] = base64.b64decode(item["Value"])
+            else:
+                item["Value"] = ""
     return ret
 
 
@@ -276,9 +275,8 @@ def put(consul_url=None, token=None, key=None, value=None, **kwargs):
     available_sessions = session_list(consul_url=consul_url, return_list=True)
     _current = get(consul_url=consul_url, token=token, key=key)
 
-    if "flags" in kwargs:
-        if kwargs["flags"] >= 0 and kwargs["flags"] <= 2**64:
-            query_params["flags"] = kwargs["flags"]
+    if "flags" in kwargs and 0 <= kwargs["flags"] <= 2**64:
+        query_params["flags"] = kwargs["flags"]
 
     if "cas" in kwargs:
         if _current["res"]:
@@ -1078,8 +1076,7 @@ def agent_service_register(consul_url=None, token=None, decode=False, text=True,
                 ret["res"] = False
                 return ret
         else:
-            if "Interval" in check_dd:
-                del check_dd["Interval"]  # not required, so ignore it
+            check_dd.pop("Interval", None)  # not required, so ignore it
 
         if check_dd:
             data["Check"] = check_dd  # if empty, ignore it
@@ -2345,8 +2342,7 @@ def acl_clone(consul_url=None, token=None, **kwargs):
     return ret
 
 
-# pylint: disable=unused-argument
-def acl_list(consul_url=None, token=None, **kwargs):
+def acl_list(consul_url=None, token=None, **_):
     """
     List the ACL tokens.
 
@@ -2460,7 +2456,6 @@ def event_list(consul_url=None, token=None, **kwargs):
 
     """
     ret = {}
-    query_params = {}
     if not consul_url:
         consul_url = _get_config()
         if not consul_url:
@@ -2469,10 +2464,9 @@ def event_list(consul_url=None, token=None, **kwargs):
             ret["res"] = False
             return ret
 
-    if "name" in kwargs:
-        query_params = kwargs["name"]
-    else:
+    if "name" not in kwargs:
         raise SaltInvocationError('Required argument "name" is missing.')
+    query_params = kwargs["name"]
 
     function = "event/list/"
     ret = _query(consul_url=consul_url, token=token, query_params=query_params, function=function)
